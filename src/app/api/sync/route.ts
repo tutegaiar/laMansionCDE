@@ -1,4 +1,5 @@
 import { revalidateTag } from "next/cache";
+import { authorized } from "@/lib/auth";
 import { CACHE_TAG } from "@/lib/data";
 import { hasDb } from "@/lib/db";
 import { syncAll } from "@/lib/sync";
@@ -11,14 +12,6 @@ import { syncAll } from "@/lib/sync";
  */
 
 export const maxDuration = 60;
-
-function authorized(req: Request) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  const header = req.headers.get("authorization");
-  const key = new URL(req.url).searchParams.get("key");
-  return header === `Bearer ${secret}` || key === secret;
-}
 
 async function handle(req: Request) {
   if (!authorized(req)) return Response.json({ error: "no autorizado" }, { status: 401 });

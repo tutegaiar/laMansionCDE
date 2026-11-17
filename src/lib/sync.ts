@@ -1,7 +1,7 @@
 import type postgres from "postgres";
 import { club } from "./config";
 import { ensureSchema, sql } from "./db";
-import { ea, MATCH_TYPES, type EaMatch, type MatchType } from "./ea";
+import { ea, MATCH_TYPES, type EaClubDetails, type EaLeaderboardRow, type EaMatch, type MatchType } from "./ea";
 
 const int = (v: unknown) => {
   const n = parseInt(String(v ?? "0"), 10);
@@ -57,51 +57,80 @@ async function saveMatch(m: EaMatch, matchType: MatchType): Promise<boolean> {
   return inserted.length > 0;
 }
 
-/** Trae todo de EA y lo guarda. Cada parte falla por separado sin romper el resto. */
-export async function syncAll(): Promise<SyncResult> {
+/** De dónde salen los datos: EA directo, o un JSON que manda el script de sync externo. */
+export type Source = {
+  info(): Promise<unknown>;
+  overall(): Promise<unknown>;
+  members(): Promise<unknown>;
+  season(): Promise<unknown>;
+  matches(type: MatchType): Promise<unknown>;
+};
+
+/** Lo que manda scripts/ea-sync.mjs a /api/ingest: las respuestas crudas de EA. */
+export type EaPayload = {
+  info?: unknown;
+  overall?: unknown;
+  members?: unknown;
+  season?: unknown;
+  matches?: Partial<Record<MatchType, unknown>>;
+};
+
+export function payloadSource(p: EaPayload): Source {
+  return {
+    info: async () => p.info,
+    overall: async () => p.overall,
+    members: async () => p.members,
+    season: async () => p.season,
+    matches: async (t) => p.matches?.[t],
+  };
+}
+
+/** Guarda todo lo que venga de la fuente. Cada parte falla por separado sin romper el resto. */
+export async function syncFrom(source: Source): Promise<SyncResult> {
   const t0 = Date.now();
   const errors: string[] = [];
   let newMatches = 0;
   await ensureSchema();
 
-  const step = async (label: string, fn: () => Promise<void>) => {
+  // undefined = esa parte no vino (ej. el script no la mandó): se saltea sin error.
+  const step = async (label: string, get: () => Promise<unknown>, save: (data: unknown) => Promise<void>) => {
     try {
-      await fn();
+      const data = await get();
+      if (data === undefined) return;
+      await save(data);
     } catch (e) {
       errors.push(`${label}: ${e instanceof Error ? e.message : String(e)}`);
     }
   };
 
-  await step("info", async () => {
-    const data = await ea.info();
-    const details = data[club.clubId];
+  await step("info", source.info, async (data) => {
+    const details = (data as Record<string, EaClubDetails>)?.[club.clubId];
     if (!details) throw new Error("respuesta sin el club");
     await saveSnapshot("info", details);
   });
 
-  await step("overall", async () => {
-    const data = await ea.overall();
+  await step("overall", source.overall, async (data) => {
     if (!Array.isArray(data) || !data[0]) throw new Error("respuesta inesperada");
     await saveSnapshot("overall", data[0]);
   });
 
-  await step("members", async () => {
-    const data = await ea.members();
-    if (!Array.isArray(data?.members)) throw new Error("respuesta inesperada");
-    await saveSnapshot("members", data.members);
+  await step("members", source.members, async (data) => {
+    const members = (data as { members?: unknown })?.members;
+    if (!Array.isArray(members)) throw new Error("respuesta inesperada");
+    await saveSnapshot("members", members);
   });
 
-  await step("season", async () => {
-    const data = await ea.season();
-    const row = Array.isArray(data) ? data.find((r) => String(r.clubId) === club.clubId) : null;
+  await step("season", source.season, async (data) => {
+    const row = Array.isArray(data)
+      ? (data as EaLeaderboardRow[]).find((r) => String(r.clubId) === club.clubId)
+      : null;
     if (row) await saveSnapshot("season", row);
   });
 
   for (const type of MATCH_TYPES) {
-    await step(`matches:${type}`, async () => {
-      const list = await ea.matches(type);
+    await step(`matches:${type}`, () => source.matches(type), async (list) => {
       if (!Array.isArray(list)) throw new Error("respuesta inesperada");
-      for (const m of list) if (await saveMatch(m, type)) newMatches++;
+      for (const m of list as EaMatch[]) if (await saveMatch(m, type)) newMatches++;
     });
   }
 
@@ -114,3 +143,5 @@ export async function syncAll(): Promise<SyncResult> {
   return { ok: errors.length === 0, newMatches, errors, durationMs: Date.now() - t0 };
 }
 
+/** Le pega a EA desde el servidor (Vercel suele estar bloqueado por EA; ver scripts/ea-sync.mjs). */
+export const syncAll = () => syncFrom(ea);
