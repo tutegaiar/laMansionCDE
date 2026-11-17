@@ -9,28 +9,48 @@ Página con las estadísticas del club en Clubes Pro (EA SPORTS FC), usando la A
 
 ## Cómo funciona
 
+EA (Akamai) **bloquea las IPs de Vercel** (`403 Access Denied`), así que el pedido a EA
+lo hace un script chico desde una compu con IP común, y le manda los datos a la página:
+
 ```
-cron-job.org (cada 30 min) ──► /api/sync ──► API de EA
-                                   │
-                                   ▼
-                          Neon Postgres (historial)
-                                   │
-                                   ▼
-                        páginas (cacheadas, nunca le pegan a EA)
+compu prendida (cron cada 30 min)                 Vercel
+scripts/ea-sync.mjs ──► API de EA                  /api/ingest ──► Neon Postgres
+        └──────────── POST con los datos ────────────►              │
+                                                              páginas (cacheadas)
 ```
+
+`/api/sync` (Vercel le pega directo a EA) queda por si algún día EA deja de bloquear.
 
 ## Deploy
 
-1. **Vercel** → *Add New → Project* → importar este repo → Deploy (va a salir vacío, es normal).
-2. **Base**: en el proyecto de Vercel → *Storage → Create Database → Neon* → conectarla al proyecto. Eso crea `DATABASE_URL` sola.
-3. **Secreto**: *Settings → Environment Variables* → agregar `CRON_SECRET` con un valor largo al azar. Hacer *Redeploy*.
-4. **Primera carga**: abrir `https://TU-PAGINA.vercel.app/api/sync?key=TU_CRON_SECRET`. Tiene que responder `"ok": true`. Las tablas se crean solas.
-5. **Cron**: en [cron-job.org](https://cron-job.org) crear un job:
-   - URL: `https://TU-PAGINA.vercel.app/api/sync`
-   - Cada 30 minutos
-   - *Advanced → Headers*: `Authorization: Bearer TU_CRON_SECRET`
+1. **Vercel** → importar el repo y deployar.
+2. **Neon**: *Storage → Create Database → Neon* (región US East), conectarla al proyecto. Crea `DATABASE_URL` sola.
+3. **Secreto**: agregar `CRON_SECRET` en *Environment Variables*.
+4. **Redeploy** (las variables nuevas solo aplican a deploys nuevos).
 
-Si `/api/sync` devuelve errores tipo `HTTP 403` / `Access Denied` es que EA está bloqueando a Vercel. Avisá y lo movemos a un server propio.
+## Script de sync (`scripts/ea-sync.mjs`)
+
+Necesita Node 18+ y nada más. Probarlo a mano:
+
+```bash
+SITE_URL=https://la-mansion-cde.vercel.app CRON_SECRET=tu_secret node scripts/ea-sync.mjs
+```
+
+Tiene que terminar con `HTTP 200 ... "ok":true`.
+
+**Linux (server, VM, Raspberry)** — `crontab -e`:
+
+```
+*/30 * * * * cd /ruta/al/repo && SITE_URL=https://la-mansion-cde.vercel.app CRON_SECRET=tu_secret /usr/bin/node scripts/ea-sync.mjs >> /var/log/ea-sync.log 2>&1
+```
+
+**Windows** — Programador de tareas → Crear tarea → Desencadenador "Diariamente, repetir cada 30 minutos" → Acción:
+
+- Programa: `powershell`
+- Argumentos: `-NoProfile -Command "$env:SITE_URL='https://la-mansion-cde.vercel.app'; $env:CRON_SECRET='tu_secret'; node C:\ruta\al\repo\scripts\ea-sync.mjs"`
+
+EA solo guarda los últimos 10 partidos por tipo: mientras la compu corra el script al menos
+una vez cada 10 partidos, no se pierde nada.
 
 ## Personalizar
 
