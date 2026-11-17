@@ -1,26 +1,82 @@
 @import "tailwindcss";
 
+/* Colores del club: se pisan en runtime con los de la camiseta (ver layout). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --kit-1: #090b0d;
+  --kit-2: #147027;
+  --kit-3: #d9d9d9;
+
+  --bg: color-mix(in oklab, var(--kit-1) 92%, #000);
+  --surface: color-mix(in oklab, var(--kit-1) 80%, #fff 6%);
+  --surface-2: color-mix(in oklab, var(--kit-1) 70%, #fff 10%);
+  --line: color-mix(in oklab, #fff 10%, transparent);
+  --fg: #eef1ee;
+  --muted: #8f9792;
+  --accent: color-mix(in oklab, var(--kit-2) 70%, #7dffa0 30%);
+  --accent-ink: color-mix(in oklab, var(--kit-2) 55%, #000);
+  --win: #3ddc84;
+  --draw: #c9c26b;
+  --loss: #ef5b5b;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-kit: var(--kit-2);
+  --color-win: var(--win);
+  --color-draw: var(--draw);
+  --color-loss: var(--loss);
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Barlow Condensed", "Arial Narrow", ui-sans-serif, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--bg);
+  color: var(--fg);
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum" 1, "cv11" 1;
+}
+
+.display {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+}
+
+/* Patrón de rayas sutil tipo camiseta para el hero */
+.stripes {
+  background-image: repeating-linear-gradient(
+    115deg,
+    color-mix(in oklab, var(--kit-2) 22%, transparent) 0 18px,
+    transparent 18px 44px
+  );
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.row-link {
+  transition: background-color 120ms ease;
+}
+.row-link:hover {
+  background: var(--surface-2);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
 }

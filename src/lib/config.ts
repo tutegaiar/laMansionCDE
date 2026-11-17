@@ -1,0 +1,38 @@
+/**
+ * Configuración del club. Lo único que hay que tocar a mano.
+ */
+
+export type PlayerOverride = {
+  /** Nombre a mostrar en vez del gamertag (útil si EA devuelve un hash). */
+  alias?: string;
+  /** Ruta de la foto dentro de /public, ej. "/players/jarnkonungr.jpg". */
+  photo?: string;
+};
+
+export const club = {
+  name: "La Mansion CDE",
+  /** ID del club en EA. Cambia con cada FC nuevo: si deja de traer datos, buscalo de nuevo. */
+  clubId: "480112",
+  /** common-gen5 = PS5 / Xbox Series / PC (crossplay). nx = Switch. */
+  platform: "common-gen5",
+  /**
+   * División actual a mano. Los rankings de EA tardan días en actualizarse,
+   * así que si está cargada se usa esta. Dejala en `null` para usar la de EA.
+   */
+  divisionOverride: 1 as number | null,
+  /** Escudo opcional en /public (ej. "/crest.png"). Si no hay, se muestra un monograma. */
+  crest: null as string | null,
+};
+
+/**
+ * Datos extra por jugador, indexados por gamertag (como lo devuelve EA).
+ * Las fotos van en /public/players/.
+ */
+export const players: Record<string, PlayerOverride> = {
+  // "Jarnkonungr": { photo: "/players/jarnkonungr.jpg" },
+  // "f3233d8859b432db": { alias: "Nombre real del jugador" },
+};
+
+export function playerOverride(gamertag: string): PlayerOverride {
+  return players[gamertag] ?? {};
+}
