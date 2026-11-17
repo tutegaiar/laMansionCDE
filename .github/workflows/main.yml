@@ -1,0 +1,49 @@
+name: Probar acceso a EA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: IP del runner
+        run: curl -s https://api.ipify.org; echo
+
+      - name: 1) curl común
+        continue-on-error: true
+        run: |
+          curl -s -o out.txt -w "HTTP %{http_code}\n" --max-time 20 \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" \
+            -H "Accept: application/json" -H "Referer: https://www.ea.com/" \
+            "https://proclubs.ea.com/api/fc/clubs/info?platform=common-gen5&clubIds=480112"
+          head -c 200 out.txt; echo
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 2) Node fetch
+        continue-on-error: true
+        run: |
+          node --input-type=module -e '
+          const r = await fetch("https://proclubs.ea.com/api/fc/clubs/info?platform=common-gen5&clubIds=480112", { headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            Accept: "application/json", Referer: "https://www.ea.com/" } });
+          console.log("HTTP", r.status, (await r.text()).slice(0, 200));
+          '
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 3) Python con huella TLS de Chrome
+        continue-on-error: true
+        run: |
+          pip install -q curl_cffi
+          python - <<'PY'
+          from curl_cffi import requests
+          r = requests.get("https://proclubs.ea.com/api/fc/clubs/info?platform=common-gen5&clubIds=480112",
+                           impersonate="chrome", headers={"Referer": "https://www.ea.com/"}, timeout=20)
+          print("HTTP", r.status_code, r.text[:200])
+          PY
