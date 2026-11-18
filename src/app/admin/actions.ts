@@ -42,6 +42,9 @@ export async function saveComunicado(_: FormState, form: FormData): Promise<Form
   const titulo = text(form, "titulo");
   const cuerpo = text(form, "cuerpo");
   const firma = text(form, "firma") || "La Presidencia";
+  const imagen = text(form, "imagen") || null;
+  if (imagen && !/^(\/[\w./-]+|https:\/\/\S+)$/.test(imagen))
+    return { error: "La imagen tiene que ser un link https:// o una ruta del sitio (ej. /comunicados/foto.webp)." };
   if (!titulo) return { error: "Falta el título." };
   if (titulo.length > 140) return { error: "El título es muy largo (máximo 140 caracteres)." };
   if (!cuerpo) return { error: "Falta el texto del comunicado." };
@@ -49,9 +52,9 @@ export async function saveComunicado(_: FormState, form: FormData): Promise<Form
 
   const db = sql();
   if (id) {
-    await db`update comunicados set titulo = ${titulo}, cuerpo = ${cuerpo}, firma = ${firma}, editado_at = now() where id = ${id}`;
+    await db`update comunicados set titulo = ${titulo}, cuerpo = ${cuerpo}, firma = ${firma}, imagen = ${imagen}, editado_at = now() where id = ${id}`;
   } else {
-    await db`insert into comunicados (titulo, cuerpo, firma) values (${titulo}, ${cuerpo}, ${firma})`;
+    await db`insert into comunicados (titulo, cuerpo, firma, imagen) values (${titulo}, ${cuerpo}, ${firma}, ${imagen})`;
   }
   updateTag(CONTENT_TAG);
   return { ok: id ? "Comunicado actualizado." : "Comunicado publicado." };

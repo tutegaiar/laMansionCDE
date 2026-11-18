@@ -10,6 +10,7 @@ export type Comunicado = {
   titulo: string;
   cuerpo: string;
   firma: string;
+  imagen: string | null;
   publicadoAt: string;
   editadoAt: string | null;
 };
@@ -26,6 +27,7 @@ const toComunicado = (r: Record<string, unknown>): Comunicado => ({
   titulo: String(r.titulo),
   cuerpo: String(r.cuerpo),
   firma: String(r.firma),
+  imagen: (r.imagen as string) || null,
   publicadoAt: new Date(r.publicado_at as string).toISOString(),
   editadoAt: r.editado_at ? new Date(r.editado_at as string).toISOString() : null,
 });

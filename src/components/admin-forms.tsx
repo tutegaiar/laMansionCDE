@@ -54,7 +54,7 @@ export function LoginForm() {
 export function ComunicadoForm({
   initial,
 }: {
-  initial?: { id: number; titulo: string; cuerpo: string; firma: string };
+  initial?: { id: number; titulo: string; cuerpo: string; firma: string; imagen: string | null };
 }) {
   const [state, action, pending] = useActionState(saveComunicado, {});
   const pre = initial ? `c${initial.id}` : "nuevo";
@@ -91,6 +91,21 @@ export function ComunicadoForm({
           Firma
         </label>
         <input id={`${pre}-firma`} name="firma" defaultValue={initial?.firma ?? "La Presidencia"} className={input} />
+      </div>
+      <div>
+        <label htmlFor={`${pre}-imagen`} className={label}>
+          Foto (opcional)
+        </label>
+        <p id={`${pre}-imagen-ayuda`} className="mb-2 text-sm text-ink-2">
+          Link a una imagen (https://…) o una ruta del sitio, ej. /comunicados/foto.webp
+        </p>
+        <input
+          id={`${pre}-imagen`}
+          name="imagen"
+          aria-describedby={`${pre}-imagen-ayuda`}
+          defaultValue={initial?.imagen ?? ""}
+          className={input}
+        />
       </div>
       <div className="flex flex-wrap items-center gap-4">
         <button type="submit" disabled={pending} className={button}>

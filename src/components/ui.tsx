@@ -199,7 +199,20 @@ export function Empty({ children }: { children: React.ReactNode }) {
 export function CarnetPhoto({ src, name, className = "" }: { src: string; name: string; className?: string }) {
   return (
     <div className={`relative overflow-hidden bg-[#eef0ee] ${className}`}>
-      <Image src={src} alt={name} fill priority sizes="(min-width: 768px) 40vw, 100vw" className="object-contain object-bottom" />
+      {club.crest ? (
+        <Image
+          src={club.crest}
+          alt=""
+          aria-hidden
+          width={400}
+          height={555}
+          unoptimized={club.crest.endsWith(".svg")}
+          className="absolute top-[6%] right-[6%] h-[34%] w-auto opacity-[0.12]"
+        />
+      ) : null}
+      <div className="absolute inset-x-0 top-[6%] bottom-0">
+        <Image src={src} alt={name} fill priority sizes="(min-width: 768px) 40vw, 100vw" className="object-contain object-bottom" />
+      </div>
     </div>
   );
 }

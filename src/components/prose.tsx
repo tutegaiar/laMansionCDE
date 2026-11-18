@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Fragment } from "react";
 
 /**
@@ -53,6 +54,23 @@ export function Prose({ text, className = "" }: { text: string; className?: stri
           </p>
         );
       })}
+    </div>
+  );
+}
+
+/** Foto de un comunicado: ruta del sitio (optimizada) o link externo. */
+export function ComunicadoFoto({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
+  if (src.startsWith("/")) {
+    return (
+      <div className={`relative overflow-hidden bg-panel-2 ${className}`}>
+        <Image src={src} alt={alt} fill sizes="(min-width: 1024px) 60vw, 100vw" className="object-cover" />
+      </div>
+    );
+  }
+  return (
+    <div className={`overflow-hidden bg-panel-2 ${className}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- link externo cargado por la presidencia */}
+      <img src={src} alt={alt} loading="lazy" className="h-full w-full object-cover" />
     </div>
   );
 }

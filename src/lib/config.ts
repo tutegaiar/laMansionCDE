@@ -41,9 +41,9 @@ export const players: Record<string, PlayerOverride> = {
   Jarnkonungr: {
     alias: "Ricardo Iorio",
     photo: "/players/jarnkonungr-gol.webp",
-    mini: "/players/jarnkonungr-mini.webp",
+    mini: "/players/jarnkonungr-mini-v2.webp",
     scene: "/players/jarnkonungr-gol-escena.webp",
-    carnet: "/players/jarnkonungr-carnet.webp",
+    carnet: "/players/jarnkonungr-carnet-v2.webp",
   },
   // Sin alias se usa el nombre del Pro que devuelve EA. Ejemplos:
   // "ramaa_damedin": { alias: "Nombre Apellido", photo: "/players/ramaa_damedin.jpg" },

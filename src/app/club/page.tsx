@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CountUp } from "@/components/count-up";
-import { Prose } from "@/components/prose";
+import { ComunicadoFoto, Prose } from "@/components/prose";
 import { Crest, Empty, SectionHead } from "@/components/ui";
 import { club } from "@/lib/config";
 import { getComunicados, getPaginas } from "@/lib/club-content";
@@ -45,7 +45,11 @@ export default async function ClubPage() {
           <SectionHead id="comunicados" title="Comunicados" />
           {ultimo ? (
             <div className="grid grid-cols-[minmax(0,1fr)] gap-px bg-line lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)]">
-              <article className="bg-panel p-6 sm:p-10" data-reveal>
+              <article className="bg-panel" data-reveal>
+                {ultimo.imagen ? (
+                  <ComunicadoFoto src={ultimo.imagen} alt="" className="aspect-[16/9] w-full [&_img]:object-[50%_45%]" />
+                ) : null}
+                <div className="p-6 sm:p-10">
                 <p className="mb-4 flex flex-wrap items-center gap-3">
                   <span className="tv bg-loss px-2 pt-1 pb-0.5 text-xl text-white">Último</span>
                   <span className="text-base text-ink-2">{fmtDay(ultimo.publicadoAt)}</span>
@@ -55,8 +59,17 @@ export default async function ClubPage() {
                     {ultimo.titulo}
                   </Link>
                 </h3>
-                <Prose text={ultimo.cuerpo} />
-                <p className="mt-8 text-base font-semibold">{ultimo.firma}</p>
+                <Prose text={ultimo.cuerpo.split(/\n{2,}/).slice(0, 2).join("\n\n")} />
+                <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
+                  <p className="text-base font-semibold">{ultimo.firma}</p>
+                  <Link
+                    href={`/club/comunicados/${ultimo.id}`}
+                    className="tv inline-flex min-h-12 items-center bg-green px-5 text-2xl text-white hover:bg-[color-mix(in_oklab,var(--green)_85%,white)]"
+                  >
+                    Leer completo
+                  </Link>
+                </div>
+                </div>
               </article>
               <ol className="flex flex-col gap-px bg-line">
                 {resto.length ? (

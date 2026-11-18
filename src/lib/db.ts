@@ -1,4 +1,5 @@
 import postgres from "postgres";
+import { SEED_COMUNICADOS } from "./seed";
 
 /**
  * Conexión a Postgres (Neon). Usa DATABASE_URL, que Vercel carga solo
@@ -81,12 +82,22 @@ export function ensureSchema() {
         publicado_at timestamptz not null default now(),
         editado_at timestamptz
       )`;
+    await db`alter table comunicados add column if not exists imagen text`;
     await db`
       create table if not exists paginas (
         key text primary key,
         contenido text not null,
         updated_at timestamptz not null default now()
       )`;
+    // Comunicados iniciales: una sola vez por base (si se borran, no vuelven).
+    for (const c of SEED_COMUNICADOS) {
+      const fresh = await db`
+        insert into paginas (key, contenido) values (${c.key}, 'cargado')
+        on conflict (key) do nothing returning key`;
+      if (fresh.length) {
+        await db`insert into comunicados (titulo, cuerpo, firma, imagen) values (${c.titulo}, ${c.cuerpo}, ${c.firma}, ${c.imagen})`;
+      }
+    }
     await db`create index if not exists matches_played_at_idx on matches (played_at desc)`;
   })().catch((e) => {
     schemaReady = null;

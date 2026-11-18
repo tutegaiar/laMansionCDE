@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { Prose } from "@/components/prose";
+import { ComunicadoFoto, Prose } from "@/components/prose";
 import { Crest, Empty } from "@/components/ui";
 import { getComunicado } from "@/lib/club-content";
 import { fmtDate, fmtDay } from "@/lib/format";
@@ -21,6 +21,7 @@ async function Comunicado({ params }: { params: Promise<{ id: string }> }) {
         </p>
         <h1 className="tv text-6xl sm:text-7xl">{c.titulo}</h1>
       </header>
+      {c.imagen ? <ComunicadoFoto src={c.imagen} alt="" className="mb-10 aspect-[4/3] w-full [&_img]:object-[50%_45%]" /> : null}
       <Prose text={c.cuerpo} />
       <footer className="mt-12 flex items-center gap-4 border-t border-line pt-8">
         <Crest size={44} />
