@@ -18,6 +18,9 @@ export type SquadRow = {
   winPct: number;
   ovr: number;
   cleanSheets: number;
+  yellow: number;
+  red: number;
+  fouls: number;
 };
 
 type Key = Exclude<keyof SquadRow, "gamertag" | "name" | "sub" | "pos" | "avatar"> | "ga" | "gpm";
@@ -31,6 +34,9 @@ const COLS: { key: Key; label: string; title: string; fmt?: (v: number) => strin
   { key: "rating", label: "Rating", title: "Rating promedio", fmt: (v) => v.toFixed(1) },
   { key: "mom", label: "MVP", title: "Figura del partido" },
   { key: "cleanSheets", label: "VI", title: "Vallas invictas" },
+  { key: "yellow", label: "TA", title: "Tarjetas amarillas (partidos guardados)" },
+  { key: "red", label: "TR", title: "Tarjetas rojas" },
+  { key: "fouls", label: "Faltas", title: "Faltas cometidas (partidos guardados)" },
   { key: "passPct", label: "% Pase", title: "Efectividad de pase", fmt: (v) => `${v}%` },
   { key: "winPct", label: "% Vic", title: "Porcentaje de victorias", fmt: (v) => `${v}%` },
   { key: "ovr", label: "OVR", title: "Media del Pro" },

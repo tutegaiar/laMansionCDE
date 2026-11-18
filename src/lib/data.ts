@@ -1,5 +1,5 @@
 import { cacheLife, cacheTag } from "next/cache";
-import { hasDb, sql } from "./db";
+import { ensureSchema, hasDb, sql } from "./db";
 import type { EaClubDetails, EaLeaderboardRow, EaMatch, EaMember, EaOverall } from "./ea";
 
 /**
@@ -31,6 +31,9 @@ export type PlayerMatchRow = MatchRow & {
   saves: number;
   mom: boolean;
   minutes: number;
+  yellow: number;
+  red: number;
+  fouls: number;
 };
 
 export type ClubSummary = {
@@ -44,6 +47,7 @@ export type ClubSummary = {
 async function safe<T>(fallback: T, fn: () => Promise<T>): Promise<T> {
   if (!hasDb()) return fallback;
   try {
+    await ensureSchema();
     return await fn();
   } catch (e) {
     // Tabla todavía no creada (antes del primer sync) u otro error: no rompemos la página.
@@ -125,7 +129,8 @@ export async function getPlayerMatches(name: string, limit = 40): Promise<Player
   return safe([], async () => {
     const rows = await sql()`
       select m.*, p.pos, p.rating, p.goals as p_goals, p.assists, p.shots, p.passes_made,
-             p.pass_attempts, p.tackles_made, p.saves, p.mom, p.seconds_played
+             p.pass_attempts, p.tackles_made, p.saves, p.mom, p.seconds_played,
+             p.yellow, p.red_cards, p.fouls
       from match_players p join matches m using (match_id)
       where p.name = ${name}
       order by m.played_at desc
@@ -143,6 +148,9 @@ export async function getPlayerMatches(name: string, limit = 40): Promise<Player
       saves: Number(r.saves),
       mom: Boolean(r.mom),
       minutes: Math.round(Number(r.seconds_played) / 60),
+      yellow: Number(r.yellow ?? 0),
+      red: Number(r.red_cards ?? 0),
+      fouls: Number(r.fouls ?? 0),
     }));
   });
 }
@@ -176,6 +184,43 @@ export async function getPlayersInMatches(matchIds: string[]): Promise<NightPlay
       assists: Number(r.assists),
       mom: Number(r.mom),
       rating: r.rating == null ? null : Number(r.rating),
+    }));
+  });
+}
+
+export type Discipline = {
+  name: string;
+  games: number;
+  yellow: number;
+  red: number;
+  fouls: number;
+  foulsWon: number;
+  interceptions: number;
+  shotsOnTarget: number;
+  dribbles: number;
+};
+
+/** Tarjetas, faltas y otros eventos sumados en los partidos que guardó la página, por jugador. */
+export async function getDiscipline(): Promise<Discipline[]> {
+  "use cache";
+  cacheTag(CACHE_TAG);
+  cacheLife("minutes");
+  return safe([], async () => {
+    const rows = await sql()`
+      select name, count(*)::int as games, sum(yellow)::int as yellow, sum(red_cards)::int as red,
+             sum(fouls)::int as fouls, sum(fouls_won)::int as fouls_won, sum(interceptions)::int as interceptions,
+             sum(shots_on_target)::int as sot, sum(dribbles)::int as dribbles
+      from match_players group by name`;
+    return rows.map((r) => ({
+      name: String(r.name),
+      games: Number(r.games),
+      yellow: Number(r.yellow),
+      red: Number(r.red),
+      fouls: Number(r.fouls),
+      foulsWon: Number(r.fouls_won),
+      interceptions: Number(r.interceptions),
+      shotsOnTarget: Number(r.sot),
+      dribbles: Number(r.dribbles),
     }));
   });
 }

@@ -1,6 +1,7 @@
 import type postgres from "postgres";
 import { club } from "./config";
 import { ensureSchema, sql } from "./db";
+import { extraStats } from "./events";
 import { ea, MATCH_TYPES, type EaClubDetails, type EaLeaderboardRow, type EaMatch, type MatchType } from "./ea";
 
 const int = (v: unknown) => {
@@ -42,15 +43,18 @@ async function saveMatch(m: EaMatch, matchType: MatchType): Promise<boolean> {
 
   const roster = m.players[club.clubId] ?? {};
   for (const [playerId, p] of Object.entries(roster)) {
+    const x = extraStats(p);
     await db`
       insert into match_players (
         match_id, player_id, name, pos, rating, goals, assists, shots, passes_made, pass_attempts,
-        tackles_made, tackle_attempts, saves, mom, red_cards, seconds_played, clean_sheet
+        tackles_made, tackle_attempts, saves, mom, red_cards, seconds_played, clean_sheet,
+        yellow, fouls, fouls_won, interceptions, shots_on_target, dribbles
       ) values (
         ${String(m.matchId)}, ${playerId}, ${p.playername}, ${p.pos ?? null}, ${parseFloat(p.rating) || null},
         ${int(p.goals)}, ${int(p.assists)}, ${int(p.shots)}, ${int(p.passesmade)}, ${int(p.passattempts)},
         ${int(p.tacklesmade)}, ${int(p.tackleattempts)}, ${int(p.saves)}, ${p.mom === "1"},
-        ${int(p.redcards)}, ${int(p.secondsPlayed)}, ${p.cleansheetsany === "1"}
+        ${int(p.redcards)}, ${int(p.secondsPlayed)}, ${p.cleansheetsany === "1"},
+        ${x.yellow}, ${x.fouls}, ${x.foulsWon}, ${x.interceptions}, ${x.shotsOnTarget}, ${x.dribbles}
       )
       on conflict (match_id, player_id) do nothing`;
   }

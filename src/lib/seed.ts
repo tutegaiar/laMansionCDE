@@ -38,3 +38,20 @@ El camino a Primera se construye con talento, pero sobre todo con respeto, disci
 **¡VAMOS LA MANSIÓN! 💚🖤**`,
   },
 ];
+
+/** Texto inicial del reglamento interno (sale del comunicado del ascenso a Segunda). */
+export const SEED_REGLAMENTO = `El ascenso nos exige un nivel de profesionalismo y responsabilidad acorde a la categoría. Por lo tanto, no se tolerarán conductas que afecten al grupo ni el prestigio del club.
+
+## 1. Falta de compromiso en las convocatorias
+
+**1.a. Ausencias sin aviso.** Aquellos jugadores que se comprometan a asistir y luego no estén disponibles sin causa de fuerza mayor debidamente justificada, serán sancionados. En la jornada siguiente, deberán afrontar el compromiso jugando en la posición que el club determine, y no en su preferida. No se permitirá la excusa de "tengo sueño".
+
+**1.b. Impuntualidad.** Quienes confirmen que van a estar conectados a un horario específico y lleguen tarde, también recibirán sanción: deberán disputar 2 partidos en la posición que elija la mayoría de los jugadores presentes en ese momento.
+
+## 2. Expulsiones irresponsables
+
+Quienes se hagan expulsar de manera injustificada o por indisciplina durante los partidos, deberán pagar la sanción jugando 2 partidos más obligatorios una vez cumplida la fecha de suspensión por la tarjeta, y tampoco podrán poner como excusa "tengo sueño" para desconectarse antes.
+
+El camino a Primera se construye con talento, pero sobre todo con respeto, disciplina y un compromiso inquebrantable con el escudo.
+
+**Comisión Directiva de La Mansión**`;

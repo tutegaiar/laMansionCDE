@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { SquadTable, type SquadRow } from "@/components/squad-table";
 import { Empty, PlayerFace } from "@/components/ui";
-import { getClubSummary } from "@/lib/data";
+import { getClubSummary, getDiscipline } from "@/lib/data";
 import { displayName, gamertagLabel, num, posLabel } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Plantel" };
 
 export default async function PlantelPage() {
-  const { members } = await getClubSummary();
+  const [{ members }, discipline] = await Promise.all([getClubSummary(), getDiscipline()]);
 
   const rows: SquadRow[] = members.map((m) => {
     const name = displayName(m.name, m);
@@ -26,6 +26,9 @@ export default async function PlantelPage() {
       winPct: num(m.winRate),
       ovr: num(m.proOverall),
       cleanSheets: num(m.favoritePosition === "goalkeeper" ? m.cleanSheetsGK : m.cleanSheetsDef),
+      yellow: discipline.find((d) => d.name === m.name)?.yellow ?? 0,
+      red: Math.max(num(m.redCards), discipline.find((d) => d.name === m.name)?.red ?? 0),
+      fouls: discipline.find((d) => d.name === m.name)?.fouls ?? 0,
     };
   });
 
@@ -48,7 +51,7 @@ export default async function PlantelPage() {
       )}
       <p className="mt-4 text-sm text-ink-2">
         Totales del club según EA, todas las competencias. VI: vallas invictas, como arquero o defensor según su posición
-        favorita.
+        favorita. TA y faltas: partidos guardados por la página (EA no da el total).
       </p>
     </div>
   );

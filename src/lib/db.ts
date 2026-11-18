@@ -1,5 +1,6 @@
 import postgres from "postgres";
-import { SEED_COMUNICADOS } from "./seed";
+import { extraStats } from "./events";
+import { SEED_COMUNICADOS, SEED_REGLAMENTO } from "./seed";
 
 /**
  * Conexión a Postgres (Neon). Usa DATABASE_URL, que Vercel carga solo
@@ -72,7 +73,36 @@ export function ensureSchema() {
         clean_sheet boolean not null default false,
         primary key (match_id, player_id)
       )`;
+    await db`
+      create table if not exists paginas (
+        key text primary key,
+        contenido text not null,
+        updated_at timestamptz not null default now()
+      )`;
     await db`create index if not exists match_players_name_idx on match_players (name)`;
+    // Tarjetas, faltas y otros eventos (decodificados de match_event_aggregate).
+    for (const col of ["yellow", "fouls", "fouls_won", "interceptions", "shots_on_target", "dribbles"]) {
+      await db.unsafe(`alter table match_players add column if not exists ${col} int not null default 0`);
+    }
+    // Completa los partidos que se guardaron antes de tener estas columnas (una sola vez).
+    const backfill = await db`
+      insert into paginas (key, contenido) values ('migr:events-v1', 'ok')
+      on conflict (key) do nothing returning key`.catch(() => []);
+    if (backfill.length) {
+      const rows = await db`select match_id, raw from matches`;
+      for (const r of rows) {
+        const raw = r.raw as { players?: Record<string, Record<string, Record<string, unknown>>> };
+        for (const roster of Object.values(raw.players ?? {})) {
+          for (const [pid, p] of Object.entries(roster)) {
+            const x = extraStats(p);
+            await db`
+              update match_players set yellow = ${x.yellow}, fouls = ${x.fouls}, fouls_won = ${x.foulsWon},
+                interceptions = ${x.interceptions}, shots_on_target = ${x.shotsOnTarget}, dribbles = ${x.dribbles}
+              where match_id = ${String(r.match_id)} and player_id = ${pid}`;
+          }
+        }
+      }
+    }
     await db`
       create table if not exists comunicados (
         id serial primary key,
@@ -89,6 +119,8 @@ export function ensureSchema() {
         contenido text not null,
         updated_at timestamptz not null default now()
       )`;
+    // Reglamento inicial: solo si todavía no hay uno escrito (nunca pisa lo cargado desde /admin).
+    await db`insert into paginas (key, contenido) values ('reglamento', ${SEED_REGLAMENTO}) on conflict (key) do nothing`;
     // Comunicados iniciales: una sola vez por base (si se borran, no vuelven).
     for (const c of SEED_COMUNICADOS) {
       const fresh = await db`

@@ -4,12 +4,13 @@ import { Suspense } from "react";
 import { CountUp } from "@/components/count-up";
 import { CarnetPhoto, Empty, PlayerStage, RatingChart, ResultChip, SectionHead } from "@/components/ui";
 import { playerOverride } from "@/lib/config";
-import { getClubSummary, getPlayerMatches } from "@/lib/data";
+import { getClubSummary, getDiscipline, getPlayerMatches } from "@/lib/data";
 import { displayName, fmtDay, gamertagLabel, fmtTime, MATCH_TYPE_LABEL, num, posLabel, posShort, resultOf } from "@/lib/format";
 
 async function Player({ params }: { params: Promise<{ name: string }> }) {
   const gamertag = decodeURIComponent((await params).name);
-  const [{ members }, games] = await Promise.all([getClubSummary(), getPlayerMatches(gamertag)]);
+  const [{ members }, games, discipline] = await Promise.all([getClubSummary(), getPlayerMatches(gamertag), getDiscipline()]);
+  const disc = discipline.find((d) => d.name === gamertag);
   const m = members.find((x) => x.name === gamertag) ?? null;
   if (!m && !games.length) notFound();
 
@@ -91,6 +92,38 @@ async function Player({ params }: { params: Promise<{ name: string }> }) {
           <Empty>Este jugador ya no figura en el plantel actual; se muestran solo los partidos guardados.</Empty>
         )}
 
+        {disc ? (
+          <section aria-labelledby="disciplina">
+            <SectionHead id="disciplina" title="Disciplina y juego" aside={`En los ${disc.games} partidos guardados`} />
+            <dl className="grid grid-cols-2 gap-px bg-line md:grid-cols-4">
+              {[
+                { label: "Amarillas", value: disc.yellow, chip: "bg-[#f2c94c]" },
+                { label: "Rojas", value: disc.red, chip: "bg-[#e5383b]" },
+                { label: "Faltas cometidas", value: disc.fouls },
+                { label: "Faltas recibidas", value: disc.foulsWon },
+                { label: "Intercepciones", value: disc.interceptions },
+                { label: "Tiros al arco", value: disc.shotsOnTarget },
+                { label: "Regates", value: disc.dribbles },
+                { label: "Faltas por partido", value: disc.games ? disc.fouls / disc.games : 0, decimals: 2 },
+              ].map((s, i) => (
+                <div key={s.label} className="bg-panel px-5 py-5" data-reveal style={{ ["--i" as string]: i }}>
+                  <dt className="flex items-center gap-2 text-base text-ink-2">
+                    {s.chip ? <span className={`block h-4 w-3 rounded-[2px] ${s.chip}`} aria-hidden /> : null}
+                    {s.label}
+                  </dt>
+                  <dd className="tv mt-2 text-6xl">
+                    <CountUp value={s.value} decimals={s.decimals ?? 0} />
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-3 text-sm text-ink-2">
+              EA no da estos totales por temporada: salen de los partidos que fue guardando la página. Tarjetas amarillas y
+              faltas se leen de los eventos del partido según la investigación de la comunidad (EA no los documenta).
+            </p>
+          </section>
+        ) : null}
+
         <section aria-labelledby="rating">
           <SectionHead
             id="rating"
@@ -123,6 +156,8 @@ async function Player({ params }: { params: Promise<{ name: string }> }) {
                           {g.goals}–{g.goalsAgainst} {g.opponentName ?? "Rival"}
                         </span>
                         {g.mom ? <span className="tv bg-ink px-2 pt-1 pb-0.5 text-lg text-ground">Figura</span> : null}
+                        {g.yellow ? <span className="block h-5 w-3.5 shrink-0 rounded-[2px] bg-[#f2c94c]" title="Amarilla" /> : null}
+                        {g.red ? <span className="block h-5 w-3.5 shrink-0 rounded-[2px] bg-[#e5383b]" title="Roja" /> : null}
                       </span>
                       <span className="block text-sm text-ink-2">
                         {MATCH_TYPE_LABEL[g.matchType]} · {fmtDay(g.playedAt)} {fmtTime(g.playedAt)} · {posShort(g.pos)} ·{" "}

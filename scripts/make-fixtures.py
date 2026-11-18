@@ -46,11 +46,20 @@ def match(i, ts):
             "tacklesmade": str(random.randint(0, 5)), "saves": str(random.randint(1, 7) if p[3] == "goalkeeper" else 0),
             "mom": "1" if p == mom else "0", "redcards": "0", "secondsPlayed": "5400",
             "cleansheetsany": "1" if ga == 0 else "0",
+            "redcards": "1" if random.random() < 0.04 else "0",
+            "match_event_aggregate_0": ",".join(f"{k}:{v}" for k, v in {
+                2: random.choice([0, 0, 1, 2]), 95: 1 if random.random() < 0.15 else 0, 4: random.randint(0, 2),
+                6: random.randint(0, 4), 13: random.randint(0, 2), 18: random.randint(0, 1), 174: random.randint(0, 5),
+            }.items() if v),
         }
-    opp_players = {f"9{i}{k}": {"playername": f"rival_{k}", "pos": "midfielder", "rating": f"{random.uniform(5.5, 8.5):.2f}",
+    opp_pos = ["goalkeeper", "defender", "defender", "defender", "defender", "midfielder", "midfielder", "midfielder", "forward", "forward", "forward"]
+    n_opp = random.randint(6, 11)
+    opp_players = {f"9{i}{k}": {"playername": random.choice(["xX_Tano_Xx", "ElPibe", "Gordo_10", "CR7fan", "nachito", "Pocho", "TheWall", "Muralla", "Rayo", "Fideo", "Bicho"]) + str(k),
+                                 "pos": opp_pos[k], "rating": f"{random.uniform(5.5, 8.5):.2f}",
                                  "goals": "0", "assists": "0", "shots": "1", "passattempts": "20", "passesmade": "15",
                                  "tackleattempts": "3", "tacklesmade": "1", "saves": "0", "mom": "0", "redcards": "0",
-                                 "secondsPlayed": "5400", "cleansheetsany": "0"} for k in range(5)}
+                                 "secondsPlayed": "5400", "cleansheetsany": "0",
+                                 "match_event_aggregate_0": f"2:{random.randint(0,2)},95:{1 if random.random()<0.2 else 0},13:1"} for k in range(n_opp)}
     return {
         "matchId": str(500000000 + i), "timestamp": ts,
         "clubs": {

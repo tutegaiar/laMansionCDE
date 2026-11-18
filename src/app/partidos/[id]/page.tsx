@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { Pitch, toPitchPlayers } from "@/components/pitch";
 import { Crest, Empty, PlayerFace } from "@/components/ui";
-import { club } from "@/lib/config";
+import { extraStats } from "@/lib/events";
+import { club, playerOverride } from "@/lib/config";
 import { getClubSummary, getMatch } from "@/lib/data";
 import type { EaMatchPlayer } from "@/lib/ea";
 import { displayName, fmtDay, gamertagLabel, fmtTime, MATCH_TYPE_LABEL, num, playerHref, posShort, resultOf } from "@/lib/format";
@@ -13,7 +15,14 @@ const RESULT_WORD = { W: "Victoria", D: "Empate", L: "Derrota" } as const;
 function teamTotals(players: EaMatchPlayer[]) {
   const s = (k: keyof EaMatchPlayer) => players.reduce((a, p) => a + num(p[k]), 0);
   const pa = s("passattempts");
+  const ex = players.map((p) => extraStats(p));
+  const e = (k: keyof ReturnType<typeof extraStats>) => ex.reduce((a, x) => a + x[k], 0);
   return {
+    shotsOnTarget: e("shotsOnTarget"),
+    fouls: e("fouls"),
+    yellow: e("yellow"),
+    red: s("redcards"),
+    interceptions: e("interceptions"),
     shots: s("shots"),
     passes: s("passesmade"),
     passPct: pa ? Math.round((s("passesmade") / pa) * 100) : 0,
@@ -110,6 +119,25 @@ async function MatchDetail({ params }: { params: Promise<{ id: string }> }) {
       </section>
 
       <div className="mx-auto max-w-6xl space-y-16 px-4 py-14 sm:px-6">
+        <section aria-labelledby="formaciones">
+          <h2 id="formaciones" className="tv mb-6 text-5xl">
+            Formaciones
+          </h2>
+          <Pitch
+            homeName="La Mansion"
+            awayName={row.opponentName ?? "Rival"}
+            home={toPitchPlayers(ours, {
+              nameOf: (p) => displayName(p.playername, memberOf(p.playername)),
+              hrefOf: (p) => playerHref(p.playername),
+              faceOf: (p) =>
+                playerOverride(p.playername).mini ? (
+                  <PlayerFace gamertag={p.playername} name={displayName(p.playername, memberOf(p.playername))} size={48} />
+                ) : undefined,
+            })}
+            away={toPitchPlayers(theirs)}
+          />
+        </section>
+
         {theirs.length ? (
           <section aria-labelledby="numeros" className="mx-auto max-w-2xl">
             <h2 id="numeros" className="tv mb-6 text-center text-5xl">
@@ -117,10 +145,15 @@ async function MatchDetail({ params }: { params: Promise<{ id: string }> }) {
             </h2>
             <div className="space-y-6">
               <Compare i={0} label="Tiros" a={t1.shots} b={t2.shots} />
-              <Compare i={1} label="Pases completados" a={t1.passes} b={t2.passes} />
-              <Compare i={2} label="Efectividad de pase" a={t1.passPct} b={t2.passPct} suffix="%" />
-              <Compare i={3} label="Quites" a={t1.tackles} b={t2.tackles} />
-              <Compare i={4} label="Atajadas" a={t1.saves} b={t2.saves} />
+              <Compare i={1} label="Tiros al arco" a={t1.shotsOnTarget} b={t2.shotsOnTarget} />
+              <Compare i={2} label="Pases completados" a={t1.passes} b={t2.passes} />
+              <Compare i={3} label="Efectividad de pase" a={t1.passPct} b={t2.passPct} suffix="%" />
+              <Compare i={4} label="Quites" a={t1.tackles} b={t2.tackles} />
+              <Compare i={5} label="Intercepciones" a={t1.interceptions} b={t2.interceptions} />
+              <Compare i={6} label="Atajadas" a={t1.saves} b={t2.saves} />
+              <Compare i={7} label="Faltas cometidas" a={t1.fouls} b={t2.fouls} />
+              <Compare i={8} label="Tarjetas amarillas" a={t1.yellow} b={t2.yellow} />
+              <Compare i={9} label="Tarjetas rojas" a={t1.red} b={t2.red} />
             </div>
           </section>
         ) : null}
@@ -144,12 +177,15 @@ async function MatchDetail({ params }: { params: Promise<{ id: string }> }) {
                       <span className="flex items-center gap-3">
                         <span className="tv truncate text-3xl">{name}</span>
                         {p.mom === "1" ? <span className="tv bg-ink px-2 pt-1 pb-0.5 text-lg text-ground">Figura</span> : null}
+                        {extraStats(p).yellow ? <span className="block h-5 w-3.5 rounded-[2px] bg-[#f2c94c]" title="Amarilla" /> : null}
+                        {num(p.redcards) ? <span className="block h-5 w-3.5 rounded-[2px] bg-[#e5383b]" title="Roja" /> : null}
                       </span>
                       <span className="block text-sm text-ink-2">
                         {gamertagLabel(p.playername, name) ? `${p.playername} · ` : ""}
                         {posShort(p.pos)} · {num(p.goals)} G · {num(p.assists)} A · {p.shots} tiros · pases {p.passesmade}/
                         {p.passattempts} · quites {p.tacklesmade}/{p.tackleattempts}
                         {num(p.saves) ? ` · ${p.saves} atajadas` : ""}
+                        {extraStats(p).fouls ? ` · ${extraStats(p).fouls} faltas` : ""}
                       </span>
                     </span>
                     <span className={`tv w-20 py-1 text-center text-4xl ${top ? "bg-green text-white" : "bg-panel-2"}`}>
