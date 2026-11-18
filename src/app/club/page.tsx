@@ -84,6 +84,7 @@ export default async function ClubPage() {
                 ) : (
                   <li className="flex-1 bg-panel px-6 py-5 text-base text-ink-2">Los comunicados anteriores van a aparecer acá.</li>
                 )}
+                {resto.length ? <li aria-hidden className="flex-1 bg-panel" /> : null}
               </ol>
             </div>
           ) : (

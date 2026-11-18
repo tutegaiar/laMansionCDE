@@ -31,29 +31,18 @@ const motionAllowed = () => !matchMedia(RM).matches;
  * pasa solo cada 6 s, se puede deslizar en el celu, y se frena al pasar el mouse o enfocar.
  */
 export function Lineup({ players }: { players: LineupPlayer[] }) {
-  const track = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLDivElement>(null);
+  const touchX = useRef<number | null>(null);
+  const strip = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [hover, setHover] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const auto = useSyncExternalStore(subscribeMotion, motionAllowed, () => false);
+  const paused = hover || !visible || hidden;
 
-  const go = useCallback(
-    (i: number) => {
-      const el = track.current;
-      if (!el) return;
-      const n = (i + players.length) % players.length;
-      el.scrollTo({ left: n * el.clientWidth, behavior: auto ? "smooth" : "auto" });
-      setActive(n);
-    },
-    [players.length, auto],
-  );
-
-  // Índice activo según el scroll (swipe en el celu).
-  const onScroll = () => {
-    const el = track.current;
-    if (!el) return;
-    const i = Math.round(el.scrollLeft / el.clientWidth);
-    if (i !== active) setActive(i);
-  };
+  // El estado manda: la diapositiva visible es siempre `active` (sin depender del scroll del navegador).
+  const go = useCallback((i: number) => setActive((i + players.length) % players.length), [players.length]);
 
   useEffect(() => {
     if (!auto || paused) return;
@@ -61,26 +50,57 @@ export function Lineup({ players }: { players: LineupPlayer[] }) {
     return () => clearTimeout(t);
   }, [active, paused, auto, go]);
 
+  // Mantiene a la vista la miniatura del jugador activo (solo mueve la tira, no la página).
   useEffect(() => {
-    const onVis = () => setPaused(document.hidden);
+    const el = strip.current;
+    const btn = el?.children[active] as HTMLElement | undefined;
+    if (!el || !btn) return;
+    const left = btn.offsetLeft; // la tira es `relative`: offsetLeft ya es relativo a ella
+    if (left < el.scrollLeft || left + btn.offsetWidth > el.scrollLeft + el.clientWidth) {
+      el.scrollTo({ left: left - 8, behavior: auto ? "smooth" : "auto" });
+    }
+  }, [active, auto]);
+
+  // Solo avanza si el carrusel está en pantalla y la pestaña está a la vista.
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { threshold: 0.3 });
+    io.observe(el);
+    const onVis = () => setHidden(document.hidden);
     document.addEventListener("visibilitychange", onVis);
-    return () => document.removeEventListener("visibilitychange", onVis);
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVis);
+    };
   }, []);
 
   return (
     <div
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
-      onTouchStart={() => setPaused(true)}
+      ref={root}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onKeyDown={(e) => {
+        if (e.key === "ArrowRight") go(active + 1);
+        if (e.key === "ArrowLeft") go(active - 1);
+      }}
       aria-roledescription="carrusel"
       aria-label="Presentación del plantel"
     >
       <div
-        ref={track}
-        onScroll={onScroll}
-        className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto"
+        className="grid touch-pan-y"
+        onTouchStart={(e) => {
+          touchX.current = e.touches[0].clientX;
+          setHover(true);
+        }}
+        onTouchEnd={(e) => {
+          const start = touchX.current;
+          touchX.current = null;
+          setHover(false);
+          if (start == null) return;
+          const dx = e.changedTouches[0].clientX - start;
+          if (Math.abs(dx) > 40) go(active + (dx < 0 ? 1 : -1));
+        }}
       >
         {players.map((p, i) => (
           <article
@@ -88,7 +108,11 @@ export function Lineup({ players }: { players: LineupPlayer[] }) {
             data-active={i === active}
             aria-roledescription="diapositiva"
             aria-label={`${i + 1} de ${players.length}: ${p.name}`}
-            className="group grid w-full shrink-0 snap-start grid-cols-1 gap-0 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
+            aria-hidden={i !== active}
+            inert={i !== active}
+            className={`group col-start-1 row-start-1 grid w-full grid-cols-1 gap-0 transition-opacity duration-500 ease-[var(--ease-out)] md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] ${
+              i === active ? "z-10 opacity-100" : "pointer-events-none z-0 opacity-0"
+            }`}
           >
             <div className="relative overflow-hidden bg-panel">
               <div className="transition-transform duration-[1200ms] ease-[var(--ease-out)] motion-safe:scale-105 motion-safe:group-data-[active=true]:scale-100">
@@ -115,7 +139,9 @@ export function Lineup({ players }: { players: LineupPlayer[] }) {
                   <span className="block truncate">{p.name}</span>
                 </Link>
                 {p.sub ? (
-                  <div className="w-fit bg-ink px-4 py-1 text-sm font-semibold text-ground">{p.sub}</div>
+                  <div className="w-fit bg-ink px-4 py-1 text-sm font-semibold text-ground transition-opacity delay-300 duration-300 motion-safe:opacity-0 motion-safe:group-data-[active=true]:opacity-100">
+                    {p.sub}
+                  </div>
                 ) : null}
               </div>
 
@@ -147,7 +173,7 @@ export function Lineup({ players }: { players: LineupPlayer[] }) {
         >
           ‹
         </button>
-        <div className="no-scrollbar flex flex-1 gap-px overflow-x-auto">
+        <div ref={strip} className="no-scrollbar relative flex flex-1 gap-px overflow-x-auto">
           {players.map((p, i) => (
             <button
               key={p.gamertag}

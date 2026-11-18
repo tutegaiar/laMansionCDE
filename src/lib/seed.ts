@@ -37,6 +37,21 @@ El camino a Primera se construye con talento, pero sobre todo con respeto, disci
 
 **¡VAMOS LA MANSIÓN! 💚🖤**`,
   },
+  {
+    key: "seed:comunicado-ascenso-primera",
+    titulo: "¡La Mansión es de Primera!",
+    firma: "Comisión Directiva de La Mansión",
+    imagen: "/comunicados/ascenso-primera.webp",
+    cuerpo: `Desde la Comisión Directiva de La Mansión, queremos expresar nuestra más profunda alegría y agradecimiento a todo el plantel de jugadores por habernos llevado, por fin, a la **Primera División**.
+
+Llegar a la máxima categoría es el resultado del esfuerzo colectivo. Este logro es de todos: de los que están firmes conectándose todos los días, de los que suman y ayudan cada vez que pueden, y también de aquellos que lo intentaron en años anteriores dejando todo por el club aunque en su momento no se haya podido concretar el sueño.
+
+La espera terminó. Tanto los dirigentes como los hinchas estamos viviendo la mejor semana de nuestras vidas viendo a La Mansión en lo más alto.
+
+Hoy empieza una nueva etapa: nos toca defender nuestros colores en la máxima categoría con toda la responsabilidad, el compromiso y la altura que esta división exige.
+
+**¡VAMOS MANSIÓN! 💚🖤**`,
+  },
 ];
 
 /** Texto inicial del reglamento interno (sale del comunicado del ascenso a Segunda). */
