@@ -82,7 +82,7 @@ async function MatchDetail({ params }: { params: Promise<{ id: string }> }) {
           </h1>
           <div className="mt-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-8">
             <div className="flex flex-col items-center gap-3 text-center" data-reveal>
-              <Crest size={72} />
+              <Crest size={96} />
               <span className="tv text-3xl sm:text-5xl">La Mansion</span>
             </div>
             <div className="flex flex-col items-center" data-reveal style={{ ["--i" as string]: 1 }}>

@@ -116,7 +116,7 @@ export default async function Home() {
               </h1>
               <div className="mt-6 flex flex-col gap-3" data-reveal style={{ ["--i" as string]: 2 }}>
                 {div ? <DivisionBadge division={div.value} /> : null}
-                <p className="text-xl">Estadio Garden · Crossplay Play, Xbox y PC</p>
+                <p className="text-xl">Estadio Garden</p>
               </div>
             </div>
 
@@ -139,8 +139,8 @@ export default async function Home() {
           </div>
 
           <div className="relative flex items-center justify-center md:justify-end" data-reveal style={{ ["--i" as string]: 2 }}>
-            <div className="flex aspect-square w-[min(56vw,24rem)] items-center justify-center bg-green md:bg-transparent">
-              <Crest size={220} />
+            <div className="flex aspect-square w-[min(56vw,26rem)] items-center justify-center bg-green md:bg-transparent">
+              <Crest size={320} />
             </div>
           </div>
         </div>

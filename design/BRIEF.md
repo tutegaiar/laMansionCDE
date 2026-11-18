@@ -3,7 +3,7 @@ Fecha: 2026-11-18 · Modo: auditoría → **redesign**
 Tipo de producto: híbrido — vidriera del club (Experiencia/Persuadir) + stats (Operar/Leer)
 
 ## Sujeto
-Club de Clubes Pro (EA SPORTS FC 27) de un grupo de amigos argentinos. Crossplay PS5/Xbox/PC.
+Club de Clubes Pro (EA SPORTS FC 27) de un grupo de amigos argentinos.
 Página propia en Vercel que guarda cada partido (EA solo muestra los últimos 10).
 
 ## Audiencia en situación
@@ -28,7 +28,6 @@ Ver "cómo nos fue" (el último partido / la tanda de hoy) y entrar al perfil de
 - Subieron a **Primera División**: 8 ascensos, 1 descenso, skill rating 1951.
 - Juegan de noche, en tandas de ~5 partidos seguidos (22:56 → 00:35 el 16/11, 5 victorias).
 - 9 jugadores; arquero Jarnkonungr (Pro "Iorio", 2,00 m), goleador PF Gonzalez (73).
-- Crossplay: gamertags de Play, Xbox y PC en el mismo plantel.
 - Rivales reales con nombres propios (CGA FC, Vino Tinto, P0CH0CL0S FC…).
 - Datos por partido: rating, goles, asistencias, tiros, pases, quites, atajadas, MVP.
 

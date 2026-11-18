@@ -93,6 +93,7 @@ export function Crest({ size = 40 }: { size?: number }) {
         alt={`Escudo de ${club.name}`}
         width={size * 2}
         height={size * 2}
+        unoptimized={club.crest.endsWith(".svg")}
         className="shrink-0 object-contain"
         style={{ width: size, height: size }}
       />

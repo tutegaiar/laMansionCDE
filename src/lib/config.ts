@@ -22,7 +22,7 @@ export const club = {
    */
   divisionOverride: 1 as number | null,
   /** Escudo opcional en /public (ej. "/crest.png"). Si no hay, se muestra un monograma. */
-  crest: null as string | null,
+  crest: "/crest.svg" as string | null,
 };
 
 /**
