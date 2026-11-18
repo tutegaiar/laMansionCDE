@@ -195,6 +195,15 @@ export function Empty({ children }: { children: React.ReactNode }) {
   return <div className="border border-line bg-panel px-6 py-12 text-center text-ink-2">{children}</div>;
 }
 
+/** Foto carnet: el recorte de la cintura para arriba sobre un fondo claro y liso. */
+export function CarnetPhoto({ src, name, className = "" }: { src: string; name: string; className?: string }) {
+  return (
+    <div className={`relative overflow-hidden bg-[#eef0ee] ${className}`}>
+      <Image src={src} alt={name} fill priority sizes="(min-width: 768px) 40vw, 100vw" className="object-contain object-bottom" />
+    </div>
+  );
+}
+
 /** Rating por partido, SVG sin librerías. La línea se dibuja al entrar. */
 export function RatingChart({ values }: { values: number[] }) {
   if (values.length < 2) return null;

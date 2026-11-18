@@ -1,5 +1,6 @@
 import type { LineupPlayer } from "@/components/lineup";
 import { PlayerFace, PlayerStage } from "@/components/ui";
+import { playerOverride } from "./config";
 import type { EaMember } from "./ea";
 import { displayName, gamertagLabel, num, playerHref, posLabel } from "./format";
 
@@ -59,5 +60,14 @@ export function buildLineup(members: EaMember[]): LineupPlayer[] {
 
 /** Retrato grande: el recorte del Pro sobre el verde con líneas de velocidad, o sus iniciales. */
 function BigFace({ gamertag, name }: { gamertag: string; name: string }) {
-  return <PlayerStage gamertag={gamertag} name={name} className="aspect-square w-full sm:aspect-[4/5] md:aspect-auto md:h-[min(72vh,640px)]" />;
+  const scene = playerOverride(gamertag).scene;
+  return (
+    <PlayerStage
+      gamertag={gamertag}
+      name={name}
+      src={scene}
+      scene={Boolean(scene)}
+      className="aspect-square w-full sm:aspect-[4/5] md:aspect-auto md:h-[min(72vh,640px)]"
+    />
+  );
 }

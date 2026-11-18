@@ -100,7 +100,7 @@ export default async function Home() {
             />
           ) : null}
         </div>
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pt-8 pb-12 sm:px-6 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:pt-12 md:pb-16">
+        <div className="relative mx-auto grid grid-cols-[minmax(0,1fr)] max-w-7xl gap-10 px-4 pt-8 pb-12 sm:px-6 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:pt-12 md:pb-16">
           <div className="flex flex-col gap-8">
             {last ? (
               <Link
@@ -183,7 +183,7 @@ export default async function Home() {
         {night ? (
           <section aria-labelledby="noche">
             <SectionHead id="noche" title="La última noche" aside={`${fmtDay(night.start)} · ${fmtTime(night.start)} a ${fmtTime(night.end)} hs`} />
-            <div className="grid gap-px bg-line lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-px bg-line lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
               <div className="flex flex-col justify-between gap-8 bg-panel p-6 sm:p-8" data-reveal>
                 <div>
                   <dl className="flex gap-6 sm:gap-8">
@@ -288,7 +288,7 @@ export default async function Home() {
         ) : null}
 
         {/* ---------- Historial ---------- */}
-        <section aria-labelledby="historial" className="grid items-end gap-8 border-t border-line pt-12 md:grid-cols-[1fr_auto]">
+        <section aria-labelledby="historial" className="grid grid-cols-[minmax(0,1fr)] items-end gap-8 border-t border-line pt-12 md:grid-cols-[minmax(0,1fr)_auto]">
           <div>
             <h2 id="historial" className="tv text-5xl sm:text-6xl">
               Todo el historial

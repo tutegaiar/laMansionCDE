@@ -9,8 +9,10 @@ export type PlayerOverride = {
   photo?: string;
   /** Miniatura cuadrada de la cara, para listas y tablas. */
   mini?: string;
-  /** Más fotos para la ficha del jugador (se eligen con botones). */
-  gallery?: { src: string; label: string; /** Foto con fondo (escena completa), no recorte. */ scene?: boolean }[];
+  /** Foto con fondo (escena completa, ej. festejando un gol) para el carrusel del plantel. */
+  scene?: string;
+  /** Foto carnet (recorte de la cintura para arriba) para la ficha del jugador, sobre fondo claro. */
+  carnet?: string;
 };
 
 export const club = {
@@ -26,7 +28,7 @@ export const club = {
    */
   divisionOverride: 1 as number | null,
   /** Foto grande de la apertura (escena con fondo). `null` = solo el escudo sobre el verde. */
-  heroImage: "/players/jarnkonungr-gol-escena.webp" as string | null,
+  heroImage: null as string | null,
   /** Escudo opcional en /public (ej. "/crest.png"). Si no hay, se muestra un monograma. */
   crest: "/crest.svg" as string | null,
 };
@@ -40,14 +42,8 @@ export const players: Record<string, PlayerOverride> = {
     alias: "Ricardo Iorio",
     photo: "/players/jarnkonungr-gol.webp",
     mini: "/players/jarnkonungr-mini.webp",
-    // La primera es la que se ve al entrar a la ficha (foto carnet).
-    gallery: [
-      { src: "/players/jarnkonungr-carnet.webp", label: "Carnet" },
-      { src: "/players/jarnkonungr-gol-escena.webp", label: "Gol", scene: true },
-      { src: "/players/jarnkonungr-cancha.webp", label: "Cancha" },
-      { src: "/players/jarnkonungr-perfil.webp", label: "Perfil" },
-      { src: "/players/jarnkonungr-civil.webp", label: "De civil" },
-    ],
+    scene: "/players/jarnkonungr-gol-escena.webp",
+    carnet: "/players/jarnkonungr-carnet.webp",
   },
   // Sin alias se usa el nombre del Pro que devuelve EA. Ejemplos:
   // "ramaa_damedin": { alias: "Nombre Apellido", photo: "/players/ramaa_damedin.jpg" },
