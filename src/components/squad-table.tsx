@@ -43,20 +43,20 @@ export function SquadTable({ rows }: { rows: SquadRow[] }) {
   const sorted = useMemo(() => [...rows].sort((a, b) => val(b, sort) - val(a, sort)), [rows, sort]);
 
   return (
-    <div className="card overflow-x-auto">
-      <table className="w-full min-w-[820px] text-sm">
+    <div className="overflow-x-auto border border-line bg-panel">
+      <table className="w-full min-w-[860px] text-base">
         <thead>
-          <tr className="border-b border-line text-left text-xs uppercase tracking-wider text-muted">
-            <th className="px-4 py-3 font-medium">Jugador</th>
+          <tr className="border-b border-line text-left text-sm text-ink-2">
+            <th className="px-4 py-3 font-semibold">Jugador</th>
             {COLS.map((c) => (
-              <th key={c.key} className="px-2 py-3 text-right font-medium" title={c.title}>
+              <th key={c.key} className="px-1 py-1 text-right font-semibold" title={c.title}>
                 <button
                   onClick={() => setSort(c.key)}
-                  className={`uppercase ${sort === c.key ? "text-accent" : "hover:text-fg"}`}
+                  className={`tv min-h-11 px-2 text-xl ${sort === c.key ? "bg-green text-white" : "hover:text-ink"}`}
                   aria-sort={sort === c.key ? "descending" : undefined}
                 >
                   {c.label}
-                  {sort === c.key ? " ↓" : ""}
+                  
                 </button>
               </th>
             ))}
@@ -64,13 +64,13 @@ export function SquadTable({ rows }: { rows: SquadRow[] }) {
         </thead>
         <tbody className="divide-y divide-line">
           {sorted.map((r) => (
-            <tr key={r.gamertag} className="row-link">
-              <td className="px-4 py-2.5">
+            <tr key={r.gamertag} className="transition-colors hover:bg-panel-2">
+              <td className="px-4 py-2">
                 <Link href={`/jugador/${encodeURIComponent(r.gamertag)}`} className="flex items-center gap-3">
                   {r.avatar}
                   <span className="min-w-0">
-                    <span className="block truncate font-medium hover:text-accent">{r.name}</span>
-                    <span className="block text-xs text-muted">{r.pos}</span>
+                    <span className="tv block truncate text-3xl hover:underline">{r.name}</span>
+                    <span className="block text-sm text-ink-2">{r.pos}</span>
                   </span>
                 </Link>
               </td>
@@ -79,7 +79,7 @@ export function SquadTable({ rows }: { rows: SquadRow[] }) {
                 return (
                   <td
                     key={c.key}
-                    className={`px-2 py-2.5 text-right tabular-nums ${sort === c.key ? "font-semibold text-fg" : "text-fg/80"}`}
+                    className={`tv px-3 py-2 text-right text-3xl ${sort === c.key ? "text-green-ink" : ""}`}
                   >
                     {c.fmt ? c.fmt(v) : v}
                   </td>

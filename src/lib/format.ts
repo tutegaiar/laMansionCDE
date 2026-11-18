@@ -70,3 +70,16 @@ export function divisionOf(season: { currentDivision?: string } | null) {
   const d = Number(season?.currentDivision);
   return Number.isFinite(d) && d > 0 ? { value: d, manual: false } : null;
 }
+
+const toAr = (iso: string) => new Date(new Date(iso).getTime() - 3 * 3600 * 1000);
+/** "22:56" en hora argentina. */
+export const fmtTime = (iso: string) => {
+  const d = toAr(iso);
+  return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
+};
+const DAYS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+/** "domingo 16 nov" en hora argentina. */
+export const fmtDay = (iso: string) => {
+  const d = toAr(iso);
+  return `${DAYS[d.getUTCDay()]} ${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`;
+};

@@ -2,38 +2,54 @@
 
 import { useState } from "react";
 import type { MatchRow } from "@/lib/data";
-import { MATCH_TYPE_LABEL, resultOf } from "@/lib/format";
+import { fmtDay, MATCH_TYPE_LABEL } from "@/lib/format";
+import { groupNights, nightHeadline } from "@/lib/nights";
 import { MatchList } from "./match-row";
-import { Empty } from "./ui";
 
 const TABS = ["all", "leagueMatch", "playoffMatch", "friendlyMatch"] as const;
 
+/** Historial agrupado por noche, con filtro por tipo de partido. */
 export function MatchFilter({ matches }: { matches: MatchRow[] }) {
   const [tab, setTab] = useState<(typeof TABS)[number]>("all");
   const list = tab === "all" ? matches : matches.filter((m) => m.matchType === tab);
-  const rec = { W: 0, D: 0, L: 0 };
-  list.forEach((m) => rec[resultOf(m.goals, m.goalsAgainst)]++);
+  const nights = groupNights(list);
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-1 rounded-xl bg-surface p-1">
-          {TABS.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`rounded-lg px-3 py-1.5 text-sm ${tab === t ? "bg-surface-2 text-fg" : "text-muted hover:text-fg"}`}
-            >
-              {t === "all" ? "Todos" : MATCH_TYPE_LABEL[t]}
-            </button>
+      <div role="tablist" aria-label="Tipo de partido" className="no-scrollbar mb-10 flex overflow-x-auto border border-line">
+        {TABS.map((t) => (
+          <button
+            key={t}
+            role="tab"
+            type="button"
+            aria-selected={tab === t}
+            onClick={() => setTab(t)}
+            className={`tv min-h-12 flex-1 px-5 text-2xl transition-colors ${
+              tab === t ? "bg-green text-white" : "bg-panel text-ink-2 hover:text-ink"
+            }`}
+          >
+            {t === "all" ? "Todos" : MATCH_TYPE_LABEL[t]}
+          </button>
+        ))}
+      </div>
+
+      {nights.length ? (
+        <div className="space-y-14">
+          {nights.map((n) => (
+            <section key={n.key} aria-label={`Noche del ${fmtDay(n.start)}`}>
+              <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+                <h2 className="tv text-4xl first-letter:uppercase">{fmtDay(n.start)}</h2>
+                <p className="text-base text-ink-2">
+                  {nightHeadline(n)} · {n.gf}-{n.ga} en goles
+                </p>
+              </div>
+              <MatchList matches={n.matches} />
+            </section>
           ))}
         </div>
-        <div className="text-sm text-muted">
-          <span className="text-win">{rec.W}G</span> · <span className="text-draw">{rec.D}E</span> ·{" "}
-          <span className="text-loss">{rec.L}P</span>
-        </div>
-      </div>
-      {list.length ? <MatchList matches={list} /> : <Empty>No hay partidos de este tipo guardados.</Empty>}
+      ) : (
+        <p className="border border-line bg-panel px-6 py-12 text-center text-ink-2">No hay partidos de este tipo guardados.</p>
+      )}
     </div>
   );
 }

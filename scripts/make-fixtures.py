@@ -13,7 +13,7 @@ info = {CLUB: {"name": "La Mansion CDE", "clubId": int(CLUB), "regionId": 139678
 
 squad = [  # (id, gamertag, pro, pos)
     ("816742772", "Jarnkonungr", "Iorio", "goalkeeper"),
-    ("1025635507", "f3233d8859b432db", "Benítez", "forward"),
+    ("1025635507", "f3233d8859b432db", "PF Gonzalez", "forward"),
     ("1695518992", "ramaa_damedin", "Rama", "forward"),
     ("1003907419829", "papu_avena90", "Avena", "midfielder"),
     ("1006122530869", "Napoleonn912", "Napo", "midfielder"),

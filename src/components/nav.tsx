@@ -12,16 +12,19 @@ const LINKS = [
 
 function NavLinks({ path }: { path: string | null }) {
   return (
-    <nav className="flex gap-1">
+    <nav aria-label="Principal" className="flex">
       {LINKS.map((l) => {
-        const active = l.href === "/" ? path === "/" : !!path && (path.startsWith(l.href) || (l.href === "/plantel" && path.startsWith("/jugador")));
+        const active =
+          l.href === "/"
+            ? path === "/"
+            : !!path && (path.startsWith(l.href) || (l.href === "/plantel" && path.startsWith("/jugador")));
         return (
           <Link
             key={l.href}
             href={l.href}
             aria-current={active ? "page" : undefined}
-            className={`display rounded-lg px-3 py-1.5 text-lg font-semibold transition-colors ${
-              active ? "bg-kit text-white" : "text-muted hover:text-fg"
+            className={`tv relative grid min-h-11 place-items-center px-3 text-2xl transition-colors sm:px-4 ${
+              active ? "bg-green text-white" : "text-ink-2 hover:text-ink"
             }`}
           >
             {l.label}

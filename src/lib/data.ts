@@ -146,3 +146,36 @@ export async function getPlayerMatches(name: string, limit = 40): Promise<Player
     }));
   });
 }
+
+export type NightPlayer = {
+  name: string;
+  games: number;
+  goals: number;
+  assists: number;
+  mom: number;
+  rating: number | null;
+};
+
+/** Totales por jugador en un conjunto de partidos (ej. los de una noche). */
+export async function getPlayersInMatches(matchIds: string[]): Promise<NightPlayer[]> {
+  "use cache";
+  cacheTag(CACHE_TAG);
+  cacheLife("minutes");
+
+  if (!matchIds.length) return [];
+  return safe([], async () => {
+    const rows = await sql()`
+      select name, count(*)::int as games, sum(goals)::int as goals, sum(assists)::int as assists,
+             sum(case when mom then 1 else 0 end)::int as mom, avg(rating)::float as rating
+      from match_players where match_id in ${sql()(matchIds)}
+      group by name`;
+    return rows.map((r) => ({
+      name: String(r.name),
+      games: Number(r.games),
+      goals: Number(r.goals),
+      assists: Number(r.assists),
+      mom: Number(r.mom),
+      rating: r.rating == null ? null : Number(r.rating),
+    }));
+  });
+}

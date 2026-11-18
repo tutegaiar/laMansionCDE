@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SquadTable, type SquadRow } from "@/components/squad-table";
-import { Avatar, Empty, SectionTitle } from "@/components/ui";
+import { Empty, PlayerFace } from "@/components/ui";
 import { getClubSummary } from "@/lib/data";
 import { displayName, num, posLabel } from "@/lib/format";
 
@@ -8,7 +8,6 @@ export const metadata: Metadata = { title: "Plantel" };
 
 export default async function PlantelPage() {
   const { members } = await getClubSummary();
-  if (!members.length) return <Empty>Todavía no hay datos del plantel.</Empty>;
 
   const rows: SquadRow[] = members.map((m) => {
     const name = displayName(m.name, m);
@@ -16,7 +15,7 @@ export default async function PlantelPage() {
       gamertag: m.name,
       name,
       pos: posLabel(m.favoritePosition),
-      avatar: <Avatar gamertag={m.name} name={name} size={34} />,
+      avatar: <PlayerFace gamertag={m.name} name={name} size={44} />,
       gp: num(m.gamesPlayed),
       goals: num(m.goals),
       assists: num(m.assists),
@@ -30,12 +29,25 @@ export default async function PlantelPage() {
   });
 
   return (
-    <div>
-      <SectionTitle aside={`${rows.length} jugadores · tocá una columna para ordenar`}>Plantel</SectionTitle>
-      <SquadTable rows={rows} />
-      <p className="mt-3 text-xs text-muted">
-        Totales del club según EA (todas las competencias). VI = vallas invictas (como arquero o defensor según su
-        posición favorita).
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+      <header className="mb-10" data-observe>
+        <h1 className="tv wipe text-7xl sm:text-8xl">
+          <span>Plantel</span>
+        </h1>
+        <p className="mt-4 max-w-2xl text-lg">
+          {rows.length} jugadores. Tocá una columna para ordenar; tocá un jugador para ver su ficha.
+        </p>
+      </header>
+      {rows.length ? (
+        <div data-reveal>
+          <SquadTable rows={rows} />
+        </div>
+      ) : (
+        <Empty>Todavía no hay datos del plantel.</Empty>
+      )}
+      <p className="mt-4 text-sm text-ink-2">
+        Totales del club según EA, todas las competencias. VI: vallas invictas, como arquero o defensor según su posición
+        favorita.
       </p>
     </div>
   );

@@ -1,11 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { Avatar, Empty, RatingChart, ResultPill, SectionTitle, Stat } from "@/components/ui";
-import { playerOverride } from "@/lib/config";
+import { CountUp } from "@/components/count-up";
+import { Empty, PlayerFace, RatingChart, ResultChip, SectionHead } from "@/components/ui";
 import { getClubSummary, getPlayerMatches } from "@/lib/data";
-import { displayName, fmtDate, MATCH_TYPE_LABEL, num, posLabel, posShort, resultOf } from "@/lib/format";
+import { displayName, fmtDay, fmtTime, MATCH_TYPE_LABEL, num, posLabel, posShort, resultOf } from "@/lib/format";
 
 async function Player({ params }: { params: Promise<{ name: string }> }) {
   const gamertag = decodeURIComponent((await params).name);
@@ -14,140 +13,137 @@ async function Player({ params }: { params: Promise<{ name: string }> }) {
   if (!m && !games.length) notFound();
 
   const name = displayName(gamertag, m);
-  const photo = playerOverride(gamertag).photo;
   const rated = games.filter((g) => g.rating != null);
   const chart = [...rated].reverse().map((g) => g.rating as number);
   const recentAvg = rated.length ? rated.reduce((a, g) => a + (g.rating ?? 0), 0) / rated.length : null;
   const gk = (m?.favoritePosition ?? games[0]?.pos) === "goalkeeper";
+  const gp = num(m?.gamesPlayed);
+
+  const stats = m
+    ? [
+        { label: "Partidos", value: gp },
+        gk ? { label: "Vallas invictas", value: num(m.cleanSheetsGK) } : { label: "Goles", value: num(m.goals) },
+        { label: "Asistencias", value: num(m.assists) },
+        { label: "Rating promedio", value: num(m.ratingAve), decimals: 1 },
+        { label: "Veces figura", value: num(m.manOfTheMatch) },
+        { label: "% de victorias", value: num(m.winRate), suffix: "%" },
+        { label: "% de pase", value: num(m.passSuccessRate), suffix: "%" },
+        { label: "Quites", value: num(m.tacklesMade) },
+      ]
+    : [];
 
   return (
-    <div className="space-y-8">
-      <Link href="/plantel" className="text-sm text-muted hover:text-accent">
-        ← Plantel
-      </Link>
-
-      <section className="card stripes flex flex-col items-center gap-6 p-6 sm:flex-row sm:p-8">
-        {photo ? (
-          <Image
-            src={photo}
-            alt={name}
-            width={160}
-            height={200}
-            className="h-[200px] w-[160px] rounded-xl object-cover ring-1 ring-line"
-          />
-        ) : (
-          <Avatar gamertag={gamertag} name={name} size={128} />
-        )}
-        <div className="flex-1 text-center sm:text-left">
-          <h1 className="display text-5xl font-bold sm:text-6xl">{name}</h1>
-          <div className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm text-muted sm:justify-start">
-            {name !== gamertag ? <span>@{gamertag}</span> : null}
-            <span>{posLabel(m?.favoritePosition ?? games[0]?.pos)}</span>
-            {m?.proHeight ? <span>{m.proHeight} cm</span> : null}
+    <>
+      <section className="border-b border-line bg-panel">
+        <div className="mx-auto grid max-w-7xl md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+          <div className="relative aspect-[4/3] sm:aspect-[4/5] md:aspect-auto md:min-h-[560px]" data-reveal>
+            <div className="absolute inset-0 [&>*]:!h-full [&>*]:!w-full [&>span]:!text-[clamp(7rem,22vw,16rem)]">
+              <PlayerFace gamertag={gamertag} name={name} size={400} shape="portrait" priority />
+            </div>
+          </div>
+          <div className="flex flex-col justify-end gap-6 px-4 py-8 sm:px-8 md:py-12">
+            <Link href="/plantel" className="inline-flex min-h-11 w-fit items-center text-base text-ink-2 hover:text-ink">
+              ← Plantel
+            </Link>
+            <div className="flex items-baseline gap-4" data-reveal style={{ ["--i" as string]: 1 }}>
+              <span className="tv text-3xl text-green-ink">{posLabel(m?.favoritePosition ?? games[0]?.pos)}</span>
+              {m?.proHeight ? <span className="tv text-3xl text-ink-2">{m.proHeight} cm</span> : null}
+            </div>
+            <div data-reveal style={{ ["--i" as string]: 2 }}>
+              <h1 className="tv bg-green px-4 pt-3 pb-2 text-7xl break-words text-white sm:text-8xl">{name}</h1>
+              {name !== gamertag ? <p className="bg-ink px-4 py-1.5 text-base font-semibold text-ground">{gamertag}</p> : null}
+            </div>
+            {m?.proOverall ? (
+              <p className="flex items-baseline gap-3" data-reveal style={{ ["--i" as string]: 3 }}>
+                <span className="tv text-8xl">
+                  <CountUp value={num(m.proOverall)} />
+                </span>
+                <span className="text-lg text-ink-2">de media del Pro</span>
+              </p>
+            ) : null}
           </div>
         </div>
-        {m?.proOverall ? (
-          <div className="text-center">
-            <div className="display text-7xl font-bold text-accent">{m.proOverall}</div>
-            <div className="text-xs uppercase tracking-wider text-muted">Media</div>
-          </div>
-        ) : null}
       </section>
 
-      {m ? (
-        <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <Stat label="Partidos" value={m.gamesPlayed} hint={`${m.winRate}% ganados`} />
-          {gk ? (
-            <Stat label="Vallas invictas" value={m.cleanSheetsGK} accent />
-          ) : (
-            <Stat
-              label="Goles"
-              value={m.goals}
-              accent
-              hint={`${num(m.gamesPlayed) ? (num(m.goals) / num(m.gamesPlayed)).toFixed(2) : 0} por partido`}
-            />
-          )}
-          <Stat label="Asistencias" value={m.assists} />
-          <Stat label="Rating promedio" value={num(m.ratingAve).toFixed(1)} hint={`${m.manOfTheMatch} veces figura`} />
-          <Stat label="Pases" value={m.passesMade} hint={`${m.passSuccessRate}% de efectividad`} />
-          <Stat label="Quites" value={m.tacklesMade} hint={`${m.tackleSuccessRate}% de efectividad`} />
-          <Stat label="Efectividad de tiro" value={`${m.shotSuccessRate}%`} />
-          <Stat label="Rojas" value={m.redCards} />
-        </section>
-      ) : (
-        <Empty>Este jugador ya no figura en el plantel actual; se muestran solo los partidos guardados.</Empty>
-      )}
-
-      <section>
-        <SectionTitle aside={recentAvg != null ? `Promedio: ${recentAvg.toFixed(2)}` : undefined}>
-          Rating por partido
-        </SectionTitle>
-        {chart.length >= 2 ? (
-          <div className="card p-4">
-            <RatingChart values={chart} />
-          </div>
+      <div className="mx-auto max-w-7xl space-y-20 px-4 py-16 sm:px-6">
+        {m ? (
+          <section aria-labelledby="numeros">
+            <SectionHead id="numeros" title="En La Mansion" />
+            <dl className="grid grid-cols-2 gap-px bg-line md:grid-cols-4">
+              {stats.map((s, i) => (
+                <div key={s.label} className="bg-panel px-5 py-5" data-reveal style={{ ["--i" as string]: i }}>
+                  <dt className="text-base text-ink-2">{s.label}</dt>
+                  <dd className="tv mt-2 text-7xl">
+                    <CountUp value={s.value} decimals={s.decimals ?? 0} />
+                    {s.suffix}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </section>
         ) : (
-          <Empty>Hacen falta al menos 2 partidos guardados para el gráfico.</Empty>
+          <Empty>Este jugador ya no figura en el plantel actual; se muestran solo los partidos guardados.</Empty>
         )}
-      </section>
 
-      {games.length ? (
-        <section>
-          <SectionTitle aside={`${games.length} partidos guardados`}>Sus partidos</SectionTitle>
-          <div className="card overflow-x-auto">
-            <table className="w-full min-w-[600px] text-sm">
-              <thead>
-                <tr className="border-b border-line text-left text-xs uppercase tracking-wider text-muted">
-                  <th className="px-4 py-3 font-medium">Partido</th>
-                  <th className="px-2 py-3 font-medium">Pos</th>
-                  <th className="px-2 py-3 text-right font-medium">Rating</th>
-                  <th className="px-2 py-3 text-right font-medium">G</th>
-                  <th className="px-2 py-3 text-right font-medium">A</th>
-                  <th className="px-2 py-3 text-right font-medium">Tiros</th>
-                  <th className="px-4 py-3 text-right font-medium">Pases</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {games.map((g) => (
-                  <tr key={g.matchId} className="row-link">
-                    <td className="px-4 py-2.5">
-                      <Link href={`/partidos/${g.matchId}`} className="flex items-center gap-3">
-                        <ResultPill r={resultOf(g.goals, g.goalsAgainst)} size="sm" />
-                        <span>
-                          <span className="block font-medium hover:text-accent">
-                            {g.goals}-{g.goalsAgainst} vs {g.opponentName ?? "Rival"}
-                          </span>
-                          <span className="block text-xs text-muted">
-                            {MATCH_TYPE_LABEL[g.matchType]} · {fmtDate(g.playedAt)}
-                          </span>
-                        </span>
-                        {g.mom ? (
-                          <span className="rounded bg-accent px-1.5 text-[10px] font-bold text-black">MVP</span>
-                        ) : null}
-                      </Link>
-                    </td>
-                    <td className="px-2 py-2.5 text-muted">{posShort(g.pos)}</td>
-                    <td className="px-2 py-2.5 text-right font-semibold tabular-nums">{g.rating?.toFixed(1) ?? "—"}</td>
-                    <td className="px-2 py-2.5 text-right tabular-nums">{g.playerGoals}</td>
-                    <td className="px-2 py-2.5 text-right tabular-nums">{g.assists}</td>
-                    <td className="px-2 py-2.5 text-right tabular-nums">{g.shots}</td>
-                    <td className="px-4 py-2.5 text-right tabular-nums">
-                      {g.passesMade}/{g.passAttempts}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <section aria-labelledby="rating">
+          <SectionHead
+            id="rating"
+            title="Rating partido a partido"
+            aside={recentAvg != null ? `Promedio en los guardados: ${recentAvg.toFixed(2)}` : undefined}
+          />
+          {chart.length >= 2 ? (
+            <div className="border border-line bg-panel p-4 sm:p-6">
+              <RatingChart values={chart} />
+            </div>
+          ) : (
+            <Empty>Hacen falta al menos 2 partidos guardados para el gráfico.</Empty>
+          )}
         </section>
-      ) : null}
-    </div>
+
+        {games.length ? (
+          <section aria-labelledby="partidos">
+            <SectionHead id="partidos" title="Sus partidos" aside={`${games.length} guardados`} />
+            <ol className="flex flex-col gap-px bg-line">
+              {games.map((g) => (
+                <li key={g.matchId}>
+                  <Link
+                    href={`/partidos/${g.matchId}`}
+                    className="grid grid-cols-[auto_1fr_auto] items-center gap-4 bg-panel px-4 py-3 transition-colors hover:bg-panel-2 sm:px-6"
+                  >
+                    <ResultChip r={resultOf(g.goals, g.goalsAgainst)} />
+                    <span className="min-w-0">
+                      <span className="flex items-center gap-3">
+                        <span className="tv truncate text-3xl">
+                          {g.goals}–{g.goalsAgainst} {g.opponentName ?? "Rival"}
+                        </span>
+                        {g.mom ? <span className="tv bg-ink px-2 pt-1 pb-0.5 text-lg text-ground">Figura</span> : null}
+                      </span>
+                      <span className="block text-sm text-ink-2">
+                        {MATCH_TYPE_LABEL[g.matchType]} · {fmtDay(g.playedAt)} {fmtTime(g.playedAt)} · {posShort(g.pos)} ·{" "}
+                        {g.playerGoals} G · {g.assists} A · {g.shots} tiros
+                      </span>
+                    </span>
+                    <span className="tv w-20 bg-panel-2 py-1 text-center text-4xl">{g.rating?.toFixed(1) ?? "—"}</span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ) : null}
+      </div>
+    </>
   );
 }
 
 export default function PlayerPage({ params }: PageProps<"/jugador/[name]">) {
   return (
-    <Suspense fallback={<Empty>Cargando jugador…</Empty>}>
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-7xl px-4 py-16">
+          <Empty>Cargando jugador…</Empty>
+        </div>
+      }
+    >
       <Player params={params} />
     </Suspense>
   );

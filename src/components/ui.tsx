@@ -1,65 +1,99 @@
 import Image from "next/image";
 import { club, playerOverride } from "@/lib/config";
-import { resultLabel, type Result } from "@/lib/format";
+import type { Result } from "@/lib/format";
 
-export function ResultPill({ r, size = "md" }: { r: Result; size?: "sm" | "md" }) {
-  const color = { W: "bg-win text-black", D: "bg-draw text-black", L: "bg-loss text-black" }[r];
-  const dim = size === "sm" ? "h-5 w-5 text-[11px]" : "h-7 w-7 text-sm";
+const RESULT_STYLE: Record<Result, { label: string; cls: string; title: string }> = {
+  W: { label: "G", cls: "bg-green text-white", title: "Ganado" },
+  D: { label: "E", cls: "bg-draw text-black", title: "Empatado" },
+  L: { label: "P", cls: "bg-loss text-white", title: "Perdido" },
+};
+
+export function ResultChip({ r, size = "md" }: { r: Result; size?: "sm" | "md" | "lg" }) {
+  const s = RESULT_STYLE[r];
+  const dim = { sm: "h-6 w-6 text-sm", md: "h-8 w-8 text-lg", lg: "h-11 w-11 text-2xl" }[size];
   return (
-    <span
-      className={`display inline-grid place-items-center rounded-md font-semibold ${dim} ${color}`}
-      title={{ W: "Ganado", D: "Empatado", L: "Perdido" }[r]}
-    >
-      {resultLabel[r]}
+    <span className={`tv inline-grid shrink-0 place-items-center ${dim} ${s.cls}`} title={s.title}>
+      <span aria-hidden>{s.label}</span>
+      <span className="sr-only">{s.title}</span>
     </span>
   );
 }
 
-export function Stat({
-  label,
-  value,
-  hint,
-  accent,
-}: {
-  label: string;
-  value: React.ReactNode;
-  hint?: React.ReactNode;
-  accent?: boolean;
-}) {
+/** Título de sección con la cortinilla verde. */
+export function SectionHead({ title, aside, id }: { title: string; aside?: React.ReactNode; id?: string }) {
   return (
-    <div className="card px-4 py-3">
-      <div className="text-xs uppercase tracking-wider text-muted">{label}</div>
-      <div className={`display mt-1 text-4xl font-semibold ${accent ? "text-accent" : ""}`}>{value}</div>
-      {hint ? <div className="mt-1 text-xs text-muted">{hint}</div> : null}
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-2" data-observe>
+      <h2 id={id} className="tv wipe text-5xl sm:text-6xl">
+        <span>{title}</span>
+      </h2>
+      {aside ? <div className="text-base text-ink-2">{aside}</div> : null}
     </div>
   );
 }
 
-export function SectionTitle({ children, aside }: { children: React.ReactNode; aside?: React.ReactNode }) {
-  return (
-    <div className="mb-3 flex items-end justify-between gap-4">
-      <h2 className="display text-2xl font-semibold">{children}</h2>
-      {aside ? <div className="text-sm text-muted">{aside}</div> : null}
-    </div>
-  );
-}
-
-function initials(name: string) {
-  const parts = name.replace(/[_\d]+/g, " ").trim().split(/\s+/);
+export function initials(name: string) {
+  const parts = name
+    .replace(/[_\-.]+/g, " ")
+    .replace(/\d+/g, "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
   return ((parts[0]?.[0] ?? "?") + (parts[1]?.[0] ?? "")).toUpperCase();
 }
 
-/** Foto del jugador si está cargada en config; si no, iniciales con los colores del club. */
-export function Avatar({ gamertag, name, size = 40 }: { gamertag: string; name: string; size?: number }) {
+/**
+ * Cara del jugador: la foto si está cargada en config; si no, sus iniciales
+ * en la gráfica del club (campo verde plano, letras de TV).
+ */
+export function PlayerFace({
+  gamertag,
+  name,
+  size = 44,
+  shape = "square",
+  priority,
+}: {
+  gamertag: string;
+  name: string;
+  size?: number;
+  shape?: "square" | "portrait";
+  priority?: boolean;
+}) {
   const photo = playerOverride(gamertag).photo;
+  const w = size;
+  const h = shape === "portrait" ? Math.round(size * 1.25) : size;
   if (photo) {
     return (
       <Image
         src={photo}
         alt={name}
-        width={size}
-        height={size}
-        className="shrink-0 rounded-full object-cover ring-1 ring-line"
+        width={w * 2}
+        height={h * 2}
+        priority={priority}
+        className="shrink-0 object-cover object-top"
+        style={{ width: w, height: h }}
+      />
+    );
+  }
+  return (
+    <span
+      aria-hidden
+      className="tv inline-grid shrink-0 place-items-center overflow-hidden bg-green text-white"
+      style={{ width: w, height: h, fontSize: Math.round(w * 0.46) }}
+    >
+      {initials(name)}
+    </span>
+  );
+}
+
+export function Crest({ size = 40 }: { size?: number }) {
+  if (club.crest) {
+    return (
+      <Image
+        src={club.crest}
+        alt={`Escudo de ${club.name}`}
+        width={size * 2}
+        height={size * 2}
+        className="shrink-0 object-contain"
         style={{ width: size, height: size }}
       />
     );
@@ -67,34 +101,12 @@ export function Avatar({ gamertag, name, size = 40 }: { gamertag: string; name: 
   return (
     <span
       aria-hidden
-      className="display inline-grid shrink-0 place-items-center rounded-full font-semibold text-white ring-1 ring-line"
+      className="tv inline-grid shrink-0 place-items-center bg-ink text-ground"
       style={{
         width: size,
-        height: size,
-        fontSize: size * 0.4,
-        background: "linear-gradient(135deg, var(--kit-2), var(--accent-ink))",
-      }}
-    >
-      {initials(name)}
-    </span>
-  );
-}
-
-export function Crest({ size = 56 }: { size?: number }) {
-  if (club.crest) {
-    return <Image src={club.crest} alt={club.name} width={size} height={size} className="shrink-0" />;
-  }
-  return (
-    <span
-      aria-hidden
-      className="display inline-grid shrink-0 place-items-center font-bold text-white"
-      style={{
-        width: size,
-        height: size * 1.12,
-        fontSize: size * 0.34,
-        clipPath: "polygon(50% 100%, 0 78%, 0 0, 100% 0, 100% 78%)",
-        background: "linear-gradient(180deg, var(--kit-2) 0 55%, var(--kit-1) 55%)",
-        boxShadow: "inset 0 0 0 2px var(--kit-3)",
+        height: size * 1.15,
+        fontSize: size * 0.42,
+        clipPath: "polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%)",
       }}
     >
       LM
@@ -103,35 +115,36 @@ export function Crest({ size = 56 }: { size?: number }) {
 }
 
 export function Empty({ children }: { children: React.ReactNode }) {
-  return <div className="card px-5 py-10 text-center text-sm text-muted">{children}</div>;
+  return <div className="border border-line bg-panel px-6 py-12 text-center text-ink-2">{children}</div>;
 }
 
-/** Línea de rating por partido (SVG puro, sin librerías). */
+/** Rating por partido, SVG sin librerías. La línea se dibuja al entrar. */
 export function RatingChart({ values }: { values: number[] }) {
   if (values.length < 2) return null;
-  const w = 600,
-    h = 140,
-    pad = 18;
+  const w = 720,
+    h = 200,
+    padX = 28,
+    padY = 18;
   const min = 5,
     max = 10;
-  const x = (i: number) => pad + (i * (w - pad * 2)) / (values.length - 1);
-  const y = (v: number) => h - pad - ((Math.min(Math.max(v, min), max) - min) / (max - min)) * (h - pad * 2);
+  const x = (i: number) => padX + (i * (w - padX - 8)) / (values.length - 1);
+  const y = (v: number) => h - padY - ((Math.min(Math.max(v, min), max) - min) / (max - min)) * (h - padY * 2);
   const d = values.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
   const avg = values.reduce((a, b) => a + b, 0) / values.length;
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="h-auto w-full" role="img" aria-label="Rating por partido">
+    <svg viewBox={`0 0 ${w} ${h}`} className="h-auto w-full" role="img" aria-label={`Rating por partido, promedio ${avg.toFixed(2)}`} data-observe>
       {[6, 7, 8, 9].map((g) => (
         <g key={g}>
-          <line x1={pad} x2={w - pad} y1={y(g)} y2={y(g)} stroke="var(--line)" />
-          <text x={2} y={y(g) + 4} fontSize="10" fill="var(--muted)">
+          <line x1={padX} x2={w} y1={y(g)} y2={y(g)} stroke="var(--line)" />
+          <text x={0} y={y(g) + 5} fontSize="14" fill="var(--ink-2)">
             {g}
           </text>
         </g>
       ))}
-      <line x1={pad} x2={w - pad} y1={y(avg)} y2={y(avg)} stroke="var(--muted)" strokeDasharray="4 4" />
-      <path d={d} fill="none" stroke="var(--accent)" strokeWidth="2.5" strokeLinejoin="round" />
+      <line x1={padX} x2={w} y1={y(avg)} y2={y(avg)} stroke="var(--ink-2)" strokeDasharray="5 6" />
+      <path d={d} pathLength={1} fill="none" stroke="var(--green-ink)" strokeWidth="3" strokeLinejoin="round" className="rating-line" />
       {values.map((v, i) => (
-        <circle key={i} cx={x(i)} cy={y(v)} r="3.5" fill="var(--bg)" stroke="var(--accent)" strokeWidth="2">
+        <circle key={i} cx={x(i)} cy={y(v)} r="4.5" fill="var(--ground)" stroke="var(--green-ink)" strokeWidth="2.5">
           <title>{v.toFixed(1)}</title>
         </circle>
       ))}
