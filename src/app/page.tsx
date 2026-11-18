@@ -6,6 +6,7 @@ import { Lineup } from "@/components/lineup";
 import { Ticker } from "@/components/ticker";
 import { Crest, DivisionBadge, Empty, PlayerFace, ResultChip, SectionHead } from "@/components/ui";
 import { club } from "@/lib/config";
+import { getComunicados } from "@/lib/club-content";
 import { getClubSummary, getMatchCount, getMatches, getPlayersInMatches } from "@/lib/data";
 import type { EaMember } from "@/lib/ea";
 import { displayName, divisionOf, fmtDay, fmtTime, gamertagLabel, num, playerHref, resultOf } from "@/lib/format";
@@ -58,7 +59,12 @@ function boards(members: EaMember[], gp: number): LeaderBoard[] {
 }
 
 export default async function Home() {
-  const [{ overall, members, season }, recent, total] = await Promise.all([getClubSummary(), getMatches(60), getMatchCount()]);
+  const [{ overall, members, season }, recent, total, [ultimo]] = await Promise.all([
+    getClubSummary(),
+    getMatches(60),
+    getMatchCount(),
+    getComunicados(1),
+  ]);
 
   if (!overall) {
     return (
@@ -98,6 +104,11 @@ export default async function Home() {
               sizes="46vw"
               className="scene-drift object-cover object-[52%_30%]"
             />
+          ) : null}
+          {club.heroImage ? (
+            <div className="absolute right-6 bottom-6 z-10">
+              <Crest size={104} />
+            </div>
           ) : null}
         </div>
         <div className="relative mx-auto grid grid-cols-[minmax(0,1fr)] max-w-7xl gap-10 px-4 pt-8 pb-12 sm:px-6 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:pt-12 md:pb-16">
@@ -151,7 +162,7 @@ export default async function Home() {
           </div>
 
           {club.heroImage ? (
-            <div className="relative md:flex md:items-end md:justify-end" data-reveal style={{ ["--i" as string]: 2 }}>
+            <div className="relative md:self-stretch" data-reveal style={{ ["--i" as string]: 2 }}>
               {/* Celular: la foto como bloque propio; en desktop vive en la franja de la derecha. */}
               <div className="relative -mx-4 aspect-[4/3] overflow-hidden sm:-mx-6 md:hidden">
                 <Image
@@ -165,6 +176,7 @@ export default async function Home() {
               <div className="absolute bottom-4 left-0 md:hidden">
                 <Crest size={96} />
               </div>
+
             </div>
           ) : (
             <div className="relative flex items-center justify-center md:justify-end" data-reveal style={{ ["--i" as string]: 2 }}>
@@ -175,6 +187,25 @@ export default async function Home() {
           )}
         </div>
       </section>
+
+      {ultimo ? (
+        <Link
+          href={`/club/comunicados/${ultimo.id}`}
+          className="group flex items-stretch border-t border-line bg-ink text-ground"
+          aria-label={`Último momento: ${ultimo.titulo}`}
+        >
+          <span className="tv flex shrink-0 items-center gap-2 bg-loss px-4 text-2xl text-white">
+            <span className="live-dot inline-block h-2.5 w-2.5 rounded-full bg-white" aria-hidden />
+            Último momento
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col justify-center px-4 py-2 sm:flex-row sm:items-center sm:justify-start sm:gap-4">
+            <span className="tv truncate text-2xl group-hover:underline sm:text-3xl">{ultimo.titulo}</span>
+            <span className="shrink-0 text-sm font-semibold">
+              {ultimo.firma} · {fmtDay(ultimo.publicadoAt)}
+            </span>
+          </span>
+        </Link>
+      ) : null}
 
       <Ticker matches={recent.slice(0, 12)} />
 

@@ -8,6 +8,7 @@ const LINKS = [
   { href: "/", label: "Resumen" },
   { href: "/plantel", label: "Plantel" },
   { href: "/partidos", label: "Partidos" },
+  { href: "/club", label: "Club" },
 ];
 
 function NavLinks({ path }: { path: string | null }) {
@@ -23,7 +24,7 @@ function NavLinks({ path }: { path: string | null }) {
             key={l.href}
             href={l.href}
             aria-current={active ? "page" : undefined}
-            className={`tv relative grid min-h-11 place-items-center px-3 text-2xl transition-colors sm:px-4 ${
+            className={`tv relative grid min-h-11 place-items-center px-2 text-xl transition-colors sm:px-4 sm:text-2xl ${
               active ? "bg-green text-white" : "text-ink-2 hover:text-ink"
             }`}
           >

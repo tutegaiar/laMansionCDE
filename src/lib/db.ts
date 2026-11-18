@@ -72,6 +72,21 @@ export function ensureSchema() {
         primary key (match_id, player_id)
       )`;
     await db`create index if not exists match_players_name_idx on match_players (name)`;
+    await db`
+      create table if not exists comunicados (
+        id serial primary key,
+        titulo text not null,
+        cuerpo text not null,
+        firma text not null default 'La Presidencia',
+        publicado_at timestamptz not null default now(),
+        editado_at timestamptz
+      )`;
+    await db`
+      create table if not exists paginas (
+        key text primary key,
+        contenido text not null,
+        updated_at timestamptz not null default now()
+      )`;
     await db`create index if not exists matches_played_at_idx on matches (played_at desc)`;
   })().catch((e) => {
     schemaReady = null;

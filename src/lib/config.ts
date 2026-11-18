@@ -28,7 +28,7 @@ export const club = {
    */
   divisionOverride: 1 as number | null,
   /** Foto grande de la apertura (escena con fondo). `null` = solo el escudo sobre el verde. */
-  heroImage: null as string | null,
+  heroImage: "/players/jarnkonungr-gol-escena.webp" as string | null,
   /** Escudo opcional en /public (ej. "/crest.png"). Si no hay, se muestra un monograma. */
   crest: "/crest.svg" as string | null,
 };
