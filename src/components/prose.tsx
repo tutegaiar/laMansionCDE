@@ -58,12 +58,16 @@ export function Prose({ text, className = "" }: { text: string; className?: stri
   );
 }
 
-/** Foto de un comunicado: ruta del sitio (optimizada) o link externo. */
+/**
+ * Foto de un comunicado: ruta del sitio o link externo.
+ * Se sirve directo (sin el optimizador de Vercel): la foto ya viene en WebP liviano
+ * y así no depende de que el optimizador responda.
+ */
 export function ComunicadoFoto({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
   if (src.startsWith("/")) {
     return (
       <div className={`relative overflow-hidden bg-panel-2 ${className}`}>
-        <Image src={src} alt={alt} fill sizes="(min-width: 1024px) 60vw, 100vw" className="object-cover" />
+        <Image src={src} alt={alt} fill unoptimized priority className="object-cover" />
       </div>
     );
   }
