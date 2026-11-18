@@ -10,7 +10,7 @@ export type PlayerOverride = {
   /** Miniatura cuadrada de la cara, para listas y tablas. */
   mini?: string;
   /** Más fotos para la ficha del jugador (se eligen con botones). */
-  gallery?: { src: string; label: string }[];
+  gallery?: { src: string; label: string; /** Foto con fondo (escena completa), no recorte. */ scene?: boolean }[];
 };
 
 export const club = {
@@ -36,9 +36,10 @@ export const club = {
 export const players: Record<string, PlayerOverride> = {
   Jarnkonungr: {
     alias: "Ricardo Iorio",
-    photo: "/players/jarnkonungr-cancha.webp",
+    photo: "/players/jarnkonungr-gol.webp",
     mini: "/players/jarnkonungr-mini.webp",
     gallery: [
+      { src: "/players/jarnkonungr-gol-escena.webp", label: "Gol", scene: true },
       { src: "/players/jarnkonungr-cancha.webp", label: "Cancha" },
       { src: "/players/jarnkonungr-perfil.webp", label: "Perfil" },
       { src: "/players/jarnkonungr-civil.webp", label: "De civil" },

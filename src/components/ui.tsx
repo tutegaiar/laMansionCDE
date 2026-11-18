@@ -112,15 +112,32 @@ export function PlayerStage({
   name,
   src,
   priority,
+  scene,
   className = "",
 }: {
   gamertag: string;
   name: string;
   src?: string;
   priority?: boolean;
+  /** Foto con su fondo: ocupa todo el cuadro, sin campo verde. */
+  scene?: boolean;
   className?: string;
 }) {
   const photo = src ?? playerOverride(gamertag).photo;
+  if (photo && scene) {
+    return (
+      <div className={`relative overflow-hidden bg-panel ${className}`}>
+        <Image
+          src={photo}
+          alt={name}
+          fill
+          priority={priority}
+          sizes="(min-width: 768px) 45vw, 100vw"
+          className="scene-drift object-cover object-[55%_35%]"
+        />
+      </div>
+    );
+  }
   return (
     <div className={`relative overflow-hidden bg-green ${className}`}>
       <SpeedLines />

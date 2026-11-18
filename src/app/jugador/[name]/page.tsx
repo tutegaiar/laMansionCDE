@@ -44,7 +44,7 @@ async function Player({ params }: { params: Promise<{ name: string }> }) {
               <PlayerGallery
                 items={gallery.map((g, k) => ({
                   label: g.label,
-                  stage: <PlayerStage gamertag={gamertag} name={name} src={g.src} priority={k === 0} className="h-full" />,
+                  stage: <PlayerStage gamertag={gamertag} name={name} src={g.src} scene={g.scene} priority={k === 0} className="h-full" />,
                 }))}
               />
             ) : (

@@ -139,6 +139,9 @@ body {
   .speed-lines {
     animation: speed 2.6s linear infinite;
   }
+  .scene-drift {
+    animation: drift 14s var(--ease-inout) infinite alternate;
+  }
   .player-float {
     animation: float 5s var(--ease-inout) infinite alternate;
   }
@@ -169,6 +172,15 @@ body {
 @keyframes speed {
   to {
     transform: translateX(-50%);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: scale(1.04) translateX(0);
+  }
+  to {
+    transform: scale(1.1) translateX(-2%);
   }
 }
 
