@@ -133,7 +133,8 @@ export function PlayerStage({
           fill
           priority={priority}
           sizes="(min-width: 768px) 45vw, 100vw"
-          className="scene-drift object-cover object-[55%_35%]"
+          className="scene-drift object-cover"
+          style={{ objectPosition: playerOverride(gamertag).sceneFocus ?? "55% 35%" }}
         />
       </div>
     );

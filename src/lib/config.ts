@@ -11,6 +11,8 @@ export type PlayerOverride = {
   mini?: string;
   /** Foto con fondo (escena completa, ej. festejando un gol) para el carrusel del plantel. */
   scene?: string;
+  /** Dónde está el jugador en la escena (CSS object-position), ej. "35% 50%". */
+  sceneFocus?: string;
   /** Foto carnet (recorte de la cintura para arriba) para la ficha del jugador, sobre fondo claro. */
   carnet?: string;
 };
@@ -44,6 +46,13 @@ export const players: Record<string, PlayerOverride> = {
     mini: "/players/jarnkonungr-mini-v2.webp",
     scene: "/players/jarnkonungr-gol-escena.webp",
     carnet: "/players/jarnkonungr-carnet-v2.webp",
+  },
+  Feikkir: {
+    alias: "Ricardo Darín",
+    mini: "/players/feikkir-mini.webp",
+    scene: "/players/feikkir-escena.webp",
+    sceneFocus: "38% 50%",
+    carnet: "/players/feikkir-carnet.webp",
   },
   // Sin alias se usa el nombre del Pro que devuelve EA. Ejemplos:
   // "ramaa_damedin": { alias: "Nombre Apellido", photo: "/players/ramaa_damedin.jpg" },
