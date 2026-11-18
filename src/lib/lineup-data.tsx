@@ -1,5 +1,5 @@
 import type { LineupPlayer } from "@/components/lineup";
-import { PlayerFace } from "@/components/ui";
+import { PlayerFace, PlayerStage } from "@/components/ui";
 import type { EaMember } from "./ea";
 import { displayName, gamertagLabel, num, playerHref, posLabel } from "./format";
 
@@ -57,13 +57,7 @@ export function buildLineup(members: EaMember[]): LineupPlayer[] {
     });
 }
 
-/** Retrato grande: la foto si hay, si no las iniciales gigantes sobre el verde del club. */
+/** Retrato grande: el recorte del Pro sobre el verde con líneas de velocidad, o sus iniciales. */
 function BigFace({ gamertag, name }: { gamertag: string; name: string }) {
-  return (
-    <div className="relative aspect-[4/3] w-full sm:aspect-[4/5] md:aspect-auto md:h-[min(70vh,620px)]">
-      <div className="absolute inset-0 [&>*]:!h-full [&>*]:!w-full [&>span]:!text-[clamp(7rem,22vw,16rem)]">
-        <PlayerFace gamertag={gamertag} name={name} size={400} shape="portrait" />
-      </div>
-    </div>
-  );
+  return <PlayerStage gamertag={gamertag} name={name} className="aspect-square w-full sm:aspect-[4/5] md:aspect-auto md:h-[min(72vh,640px)]" />;
 }

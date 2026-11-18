@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CountUp } from "@/components/count-up";
-import { Empty, PlayerFace, RatingChart, ResultChip, SectionHead } from "@/components/ui";
+import { PlayerGallery } from "@/components/player-gallery";
+import { Empty, PlayerStage, RatingChart, ResultChip, SectionHead } from "@/components/ui";
+import { playerOverride } from "@/lib/config";
 import { getClubSummary, getPlayerMatches } from "@/lib/data";
 import { displayName, fmtDay, gamertagLabel, fmtTime, MATCH_TYPE_LABEL, num, posLabel, posShort, resultOf } from "@/lib/format";
 
@@ -13,6 +15,7 @@ async function Player({ params }: { params: Promise<{ name: string }> }) {
   if (!m && !games.length) notFound();
 
   const name = displayName(gamertag, m);
+  const gallery = playerOverride(gamertag).gallery ?? [];
   const rated = games.filter((g) => g.rating != null);
   const chart = [...rated].reverse().map((g) => g.rating as number);
   const recentAvg = rated.length ? rated.reduce((a, g) => a + (g.rating ?? 0), 0) / rated.length : null;
@@ -36,10 +39,17 @@ async function Player({ params }: { params: Promise<{ name: string }> }) {
     <>
       <section className="border-b border-line bg-panel">
         <div className="mx-auto grid max-w-7xl md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-          <div className="relative aspect-[4/3] sm:aspect-[4/5] md:aspect-auto md:min-h-[560px]" data-reveal>
-            <div className="absolute inset-0 [&>*]:!h-full [&>*]:!w-full [&>span]:!text-[clamp(7rem,22vw,16rem)]">
-              <PlayerFace gamertag={gamertag} name={name} size={400} shape="portrait" priority />
-            </div>
+          <div className="relative aspect-[4/5] md:aspect-auto md:min-h-[620px]" data-reveal>
+            {gallery.length ? (
+              <PlayerGallery
+                items={gallery.map((g, k) => ({
+                  label: g.label,
+                  stage: <PlayerStage gamertag={gamertag} name={name} src={g.src} priority={k === 0} className="h-full" />,
+                }))}
+              />
+            ) : (
+              <PlayerStage gamertag={gamertag} name={name} priority className="h-full" />
+            )}
           </div>
           <div className="flex flex-col justify-end gap-6 px-4 py-8 sm:px-8 md:py-12">
             <Link href="/plantel" className="inline-flex min-h-11 w-fit items-center text-base text-ink-2 hover:text-ink">

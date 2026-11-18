@@ -3,10 +3,14 @@
  */
 
 export type PlayerOverride = {
-  /** Nombre a mostrar en vez del gamertag (útil si EA devuelve un hash). */
+  /** Nombre grande del jugador en el club (si no, el nombre del Pro que da EA). */
   alias?: string;
-  /** Ruta de la foto dentro de /public, ej. "/players/jarnkonungr.jpg". */
+  /** Recorte de cuerpo entero sin fondo (PNG/WebP transparente) para el carrusel y la ficha. */
   photo?: string;
+  /** Miniatura cuadrada de la cara, para listas y tablas. */
+  mini?: string;
+  /** Más fotos para la ficha del jugador (se eligen con botones). */
+  gallery?: { src: string; label: string }[];
 };
 
 export const club = {
@@ -30,7 +34,17 @@ export const club = {
  * Las fotos van en /public/players/.
  */
 export const players: Record<string, PlayerOverride> = {
-  Jarnkonungr: { alias: "Ricardo Iorio" },
+  Jarnkonungr: {
+    alias: "Ricardo Iorio",
+    photo: "/players/jarnkonungr-cancha.webp",
+    mini: "/players/jarnkonungr-mini.webp",
+    gallery: [
+      { src: "/players/jarnkonungr-cancha.webp", label: "Cancha" },
+      { src: "/players/jarnkonungr-perfil.webp", label: "Perfil" },
+      { src: "/players/jarnkonungr-civil.webp", label: "De civil" },
+      { src: "/players/jarnkonungr-cara.webp", label: "Cara" },
+    ],
+  },
   // Sin alias se usa el nombre del Pro que devuelve EA. Ejemplos:
   // "ramaa_damedin": { alias: "Nombre Apellido", photo: "/players/ramaa_damedin.jpg" },
 };

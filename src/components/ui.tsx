@@ -42,35 +42,20 @@ export function initials(name: string) {
 }
 
 /**
- * Cara del jugador: la foto si está cargada en config; si no, sus iniciales
- * en la gráfica del club (campo verde plano, letras de TV).
+ * Cara del jugador para listas y tablas: la miniatura si está cargada en config;
+ * si no, sus iniciales en la gráfica del club (campo verde plano, letras de TV).
  */
-export function PlayerFace({
-  gamertag,
-  name,
-  size = 44,
-  shape = "square",
-  priority,
-}: {
-  gamertag: string;
-  name: string;
-  size?: number;
-  shape?: "square" | "portrait";
-  priority?: boolean;
-}) {
-  const photo = playerOverride(gamertag).photo;
-  const w = size;
-  const h = shape === "portrait" ? Math.round(size * 1.25) : size;
-  if (photo) {
+export function PlayerFace({ gamertag, name, size = 44 }: { gamertag: string; name: string; size?: number }) {
+  const mini = playerOverride(gamertag).mini;
+  if (mini) {
     return (
       <Image
-        src={photo}
-        alt={name}
-        width={w * 2}
-        height={h * 2}
-        priority={priority}
-        className="shrink-0 object-cover object-top"
-        style={{ width: w, height: h }}
+        src={mini}
+        alt=""
+        width={size * 2}
+        height={size * 2}
+        className="shrink-0 bg-green object-cover"
+        style={{ width: size, height: size }}
       />
     );
   }
@@ -78,10 +63,84 @@ export function PlayerFace({
     <span
       aria-hidden
       className="tv inline-grid shrink-0 place-items-center overflow-hidden bg-green text-white"
-      style={{ width: w, height: h, fontSize: Math.round(w * 0.46) }}
+      style={{ width: size, height: size, fontSize: Math.max(14, Math.round(size * 0.46)) }}
     >
       {initials(name)}
     </span>
+  );
+}
+
+/** Líneas de velocidad de la gráfica de TV (SVG plano, se mueven en loop). */
+export function SpeedLines() {
+  const lines = [
+    [8, 22, 0.5],
+    [18, 46, 0.25],
+    [30, 30, 0.4],
+    [44, 60, 0.2],
+    [58, 26, 0.45],
+    [70, 52, 0.3],
+    [84, 36, 0.4],
+    [94, 64, 0.2],
+  ];
+  return (
+    <svg aria-hidden className="speed-lines absolute inset-0 h-full w-[200%]" viewBox="0 0 200 100" preserveAspectRatio="none">
+      {[0, 100].map((off) =>
+        lines.map(([y, len, o], i) => (
+          <line
+            key={`${off}-${i}`}
+            x1={off + ((i * 13) % 60)}
+            x2={off + ((i * 13) % 60) + len}
+            y1={y}
+            y2={y - 6}
+            stroke="#ffffff"
+            strokeOpacity={o * 0.5}
+            strokeWidth={0.6 + (i % 3) * 0.5}
+            vectorEffect="non-scaling-stroke"
+          />
+        )),
+      )}
+    </svg>
+  );
+}
+
+/**
+ * Escenario del jugador: campo verde, líneas de velocidad y el recorte del Pro parado abajo.
+ * Sin foto, las iniciales gigantes.
+ */
+export function PlayerStage({
+  gamertag,
+  name,
+  src,
+  priority,
+  className = "",
+}: {
+  gamertag: string;
+  name: string;
+  src?: string;
+  priority?: boolean;
+  className?: string;
+}) {
+  const photo = src ?? playerOverride(gamertag).photo;
+  return (
+    <div className={`relative overflow-hidden bg-green ${className}`}>
+      <SpeedLines />
+      {photo ? (
+        <div className="player-float absolute inset-x-0 bottom-0 top-[6%]">
+          <Image
+            src={photo}
+            alt={name}
+            fill
+            priority={priority}
+            sizes="(min-width: 768px) 40vw, 100vw"
+            className="object-contain object-bottom"
+          />
+        </div>
+      ) : (
+        <span aria-hidden className="tv absolute inset-0 grid place-items-center text-[clamp(7rem,22vw,16rem)] text-white">
+          {initials(name)}
+        </span>
+      )}
+    </div>
   );
 }
 
