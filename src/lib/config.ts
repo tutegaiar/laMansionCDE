@@ -25,6 +25,8 @@ export const club = {
    * Dejala en `null` para usar la de EA.
    */
   divisionOverride: 1 as number | null,
+  /** Foto grande de la apertura (escena con fondo). `null` = solo el escudo sobre el verde. */
+  heroImage: "/players/jarnkonungr-gol-escena.webp" as string | null,
   /** Escudo opcional en /public (ej. "/crest.png"). Si no hay, se muestra un monograma. */
   crest: "/crest.svg" as string | null,
 };
@@ -38,12 +40,13 @@ export const players: Record<string, PlayerOverride> = {
     alias: "Ricardo Iorio",
     photo: "/players/jarnkonungr-gol.webp",
     mini: "/players/jarnkonungr-mini.webp",
+    // La primera es la que se ve al entrar a la ficha (foto carnet).
     gallery: [
+      { src: "/players/jarnkonungr-carnet.webp", label: "Carnet" },
       { src: "/players/jarnkonungr-gol-escena.webp", label: "Gol", scene: true },
       { src: "/players/jarnkonungr-cancha.webp", label: "Cancha" },
       { src: "/players/jarnkonungr-perfil.webp", label: "Perfil" },
       { src: "/players/jarnkonungr-civil.webp", label: "De civil" },
-      { src: "/players/jarnkonungr-cara.webp", label: "Cara" },
     ],
   },
   // Sin alias se usa el nombre del Pro que devuelve EA. Ejemplos:

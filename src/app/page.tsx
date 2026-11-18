@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { CountUp } from "@/components/count-up";
 import { Leaders, type LeaderBoard } from "@/components/leaders";
@@ -84,10 +85,21 @@ export default async function Home() {
       {/* ---------- Apertura de la transmisión ---------- */}
       <section className="relative overflow-hidden">
         <div
-          aria-hidden
-          className="absolute inset-y-0 right-0 hidden w-[42%] bg-green md:block"
-          style={{ clipPath: "polygon(22% 0, 100% 0, 100% 100%, 0 100%)" }}
-        />
+          aria-hidden={!club.heroImage}
+          className="absolute inset-y-0 right-0 hidden w-[46%] overflow-hidden bg-green md:block"
+          style={{ clipPath: club.heroImage ? "polygon(24% 0, 100% 0, 100% 100%, 9% 100%)" : "polygon(22% 0, 100% 0, 100% 100%, 0 100%)" }}
+        >
+          {club.heroImage ? (
+            <Image
+              src={club.heroImage}
+              alt="Festejo de gol de La Mansion"
+              fill
+              priority
+              sizes="46vw"
+              className="scene-drift object-cover object-[52%_30%]"
+            />
+          ) : null}
+        </div>
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 pt-8 pb-12 sm:px-6 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:pt-12 md:pb-16">
           <div className="flex flex-col gap-8">
             {last ? (
@@ -138,11 +150,29 @@ export default async function Home() {
             </dl>
           </div>
 
-          <div className="relative flex items-center justify-center md:justify-end" data-reveal style={{ ["--i" as string]: 2 }}>
-            <div className="flex aspect-square w-[min(56vw,26rem)] items-center justify-center bg-green md:bg-transparent">
-              <Crest size={320} />
+          {club.heroImage ? (
+            <div className="relative md:flex md:items-end md:justify-end" data-reveal style={{ ["--i" as string]: 2 }}>
+              {/* Celular: la foto como bloque propio; en desktop vive en la franja de la derecha. */}
+              <div className="relative -mx-4 aspect-[4/3] overflow-hidden sm:-mx-6 md:hidden">
+                <Image
+                  src={club.heroImage}
+                  alt="Festejo de gol de La Mansion"
+                  fill
+                  sizes="100vw"
+                  className="object-cover object-[55%_30%]"
+                />
+              </div>
+              <div className="absolute bottom-4 left-0 md:hidden">
+                <Crest size={96} />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="relative flex items-center justify-center md:justify-end" data-reveal style={{ ["--i" as string]: 2 }}>
+              <div className="flex aspect-square w-[min(56vw,26rem)] items-center justify-center bg-green md:bg-transparent">
+                <Crest size={320} />
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
