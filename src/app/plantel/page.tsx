@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SquadTable, type SquadRow } from "@/components/squad-table";
 import { Empty, PlayerFace } from "@/components/ui";
 import { getClubSummary } from "@/lib/data";
-import { displayName, num, posLabel } from "@/lib/format";
+import { displayName, gamertagLabel, num, posLabel } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Plantel" };
 
@@ -14,6 +14,7 @@ export default async function PlantelPage() {
     return {
       gamertag: m.name,
       name,
+      sub: gamertagLabel(m.name, name),
       pos: posLabel(m.favoritePosition),
       avatar: <PlayerFace gamertag={m.name} name={name} size={44} />,
       gp: num(m.gamesPlayed),
@@ -35,7 +36,7 @@ export default async function PlantelPage() {
           <span>Plantel</span>
         </h1>
         <p className="mt-4 max-w-2xl text-lg">
-          {rows.length} jugadores. Tocá una columna para ordenar; tocá un jugador para ver su ficha.
+          {rows.length} jugadores. Ordenalos por el dato que quieras y tocá uno para ver su ficha.
         </p>
       </header>
       {rows.length ? (

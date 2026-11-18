@@ -16,8 +16,9 @@ export const club = {
   /** common-gen5 = PS5 / Xbox Series / PC (crossplay). nx = Switch. */
   platform: "common-gen5",
   /**
-   * División actual a mano. Los rankings de EA tardan días en actualizarse,
-   * así que si está cargada se usa esta. Dejala en `null` para usar la de EA.
+   * División actual a mano: 0 = Elite, 1 = Primera, 2 = Segunda…
+   * Los rankings de EA tardan días en actualizarse, así que si está cargada se usa esta.
+   * Dejala en `null` para usar la de EA.
    */
   divisionOverride: 1 as number | null,
   /** Escudo opcional en /public (ej. "/crest.png"). Si no hay, se muestra un monograma. */
@@ -29,8 +30,9 @@ export const club = {
  * Las fotos van en /public/players/.
  */
 export const players: Record<string, PlayerOverride> = {
-  // "Jarnkonungr": { photo: "/players/jarnkonungr.jpg" },
-  // "f3233d8859b432db": { alias: "Nombre real del jugador" },
+  Jarnkonungr: { alias: "Ricardo Iorio" },
+  // Sin alias se usa el nombre del Pro que devuelve EA. Ejemplos:
+  // "ramaa_damedin": { alias: "Nombre Apellido", photo: "/players/ramaa_damedin.jpg" },
 };
 
 export function playerOverride(gamertag: string): PlayerOverride {

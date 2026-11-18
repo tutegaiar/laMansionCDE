@@ -7,7 +7,7 @@ export type LeaderBoard = {
   key: string;
   label: string;
   finding: string;
-  rows: { name: string; href: string; value: number; display: string; thumb: React.ReactNode }[];
+  rows: { name: string; sub: string | null; href: string; value: number; display: string; thumb: React.ReactNode }[];
 };
 
 /** Gráfico de líderes estilo TV: pestañas por categoría y barras que crecen. */
@@ -53,6 +53,7 @@ export function Leaders({ boards }: { boards: LeaderBoard[] }) {
                   />
                   <span className="tv relative flex h-full items-center px-3 text-2xl text-white group-hover:underline">
                     <span className="truncate">{r.name}</span>
+                    {r.sub ? <span className="ml-3 hidden truncate font-sans text-sm font-normal normal-case sm:inline">{r.sub}</span> : null}
                   </span>
                 </span>
                 <span className={`tv w-16 text-right text-4xl ${i === 0 ? "text-green-ink" : ""}`}>{r.display}</span>

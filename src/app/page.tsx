@@ -3,15 +3,14 @@ import { CountUp } from "@/components/count-up";
 import { Leaders, type LeaderBoard } from "@/components/leaders";
 import { Lineup } from "@/components/lineup";
 import { Ticker } from "@/components/ticker";
-import { Crest, Empty, PlayerFace, ResultChip, SectionHead } from "@/components/ui";
+import { Crest, DivisionBadge, Empty, PlayerFace, ResultChip, SectionHead } from "@/components/ui";
 import { club } from "@/lib/config";
 import { getClubSummary, getMatchCount, getMatches, getPlayersInMatches } from "@/lib/data";
 import type { EaMember } from "@/lib/ea";
-import { displayName, divisionOf, fmtDay, fmtTime, num, playerHref, resultOf } from "@/lib/format";
+import { displayName, divisionOf, fmtDay, fmtTime, gamertagLabel, num, playerHref, resultOf } from "@/lib/format";
 import { buildLineup } from "@/lib/lineup-data";
-import { groupNights, nightHeadline } from "@/lib/nights";
+import { groupNights } from "@/lib/nights";
 
-const DIV_NAMES = ["", "Primera", "Segunda", "Tercera", "Cuarta", "Quinta", "Sexta", "Séptima", "Octava", "Novena", "Décima"];
 
 function boards(members: EaMember[], gp: number): LeaderBoard[] {
   const nameOf = (m: EaMember) => displayName(m.name, m);
@@ -33,6 +32,7 @@ function boards(members: EaMember[], gp: number): LeaderBoard[] {
       finding: rows[0] ? finding(rows[0], value(rows[0])) : "",
       rows: rows.map((m) => ({
         name: nameOf(m),
+        sub: gamertagLabel(m.name, nameOf(m)),
         href: playerHref(m.name),
         value: value(m),
         display: fmt(value(m)),
@@ -114,21 +114,21 @@ export default async function Home() {
                 <br />
                 <span className="text-green-ink">CDE</span>
               </h1>
-              <p className="mt-5 max-w-xl text-xl" data-reveal style={{ ["--i" as string]: 2 }}>
-                {div ? `${DIV_NAMES[div.value] ?? `${div.value}ª`} División` : "Clubes Pro"} · Estadio Garden ·
-                Crossplay Play, Xbox y PC
-              </p>
+              <div className="mt-6 flex flex-col gap-3" data-reveal style={{ ["--i" as string]: 2 }}>
+                {div ? <DivisionBadge division={div.value} /> : null}
+                <p className="text-xl">Estadio Garden · Crossplay Play, Xbox y PC</p>
+              </div>
             </div>
 
             <dl className="grid grid-cols-2 gap-px bg-line sm:grid-cols-4" data-reveal style={{ ["--i" as string]: 3 }}>
               {[
                 { label: "Partidos", value: gp },
                 { label: "Ganados", value: w },
-                { label: "Goles a favor", value: num(overall.goals) },
+                { label: "Goles", value: num(overall.goals) },
                 { label: "Racha", value: streak, suffix: streak ? "G" : "" },
               ].map((s) => (
                 <div key={s.label} className="bg-ground px-4 py-3">
-                  <dt className="text-sm text-ink-2">{s.label}</dt>
+                  <dt className="text-sm whitespace-nowrap text-ink-2">{s.label}</dt>
                   <dd className="tv mt-1 text-6xl">
                     <CountUp value={s.value} />
                     {s.suffix}
@@ -156,21 +156,38 @@ export default async function Home() {
             <div className="grid gap-px bg-line lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
               <div className="flex flex-col justify-between gap-8 bg-panel p-6 sm:p-8" data-reveal>
                 <div>
-                  <p className="tv text-5xl sm:text-6xl">{nightHeadline(night)}</p>
-                  <p className="mt-4 text-xl">
-                    {night.gf} goles a favor y {night.ga} en contra.
+                  <dl className="flex gap-6 sm:gap-8">
+                    {[
+                      { label: night.w === 1 ? "Ganado" : "Ganados", v: night.w, cls: "text-green-ink" },
+                      { label: night.d === 1 ? "Empate" : "Empates", v: night.d, cls: "" },
+                      { label: night.l === 1 ? "Perdido" : "Perdidos", v: night.l, cls: night.l ? "text-loss-ink" : "" },
+                    ].map((x) => (
+                      <div key={x.label}>
+                        <dd className={`tv text-8xl ${x.cls}`}>
+                          <CountUp value={x.v} />
+                        </dd>
+                        <dt className="mt-1 text-base text-ink-2">{x.label}</dt>
+                      </div>
+                    ))}
+                  </dl>
+                  <p className="mt-6 text-xl">
+                    {night.matches.length} {night.matches.length === 1 ? "partido" : "partidos"}, {night.gf} goles a favor y{" "}
+                    {night.ga} en contra.
                   </p>
                 </div>
                 {figure ? (
                   <Link href={playerHref(figure.name)} className="group block">
                     <p className="mb-2 text-base text-ink-2">Figura de la noche</p>
                     <div className="flex items-stretch">
-                      <PlayerFace gamertag={figure.name} name={displayName(figure.name, figureMember)} size={88} />
+                      <PlayerFace gamertag={figure.name} name={displayName(figure.name, figureMember)} size={112} />
                       <div className="flex min-w-0 flex-1 flex-col">
-                        <span className="tv truncate bg-green px-3 pt-2 pb-1 text-5xl text-white group-hover:underline">
+                        <span className="tv flex-1 truncate bg-green px-3 pt-3 pb-1 text-6xl text-white group-hover:underline">
                           {displayName(figure.name, figureMember)}
                         </span>
                         <span className="bg-ink px-3 py-1.5 text-base font-semibold text-ground">
+                          {gamertagLabel(figure.name, displayName(figure.name, figureMember)) ? (
+                            <span className="mr-2 font-normal">{figure.name} ·</span>
+                          ) : null}
                           {figure.goals} goles · {figure.assists} asist. · {figure.mom} {figure.mom === 1 ? "vez figura" : "veces figura"}
                           {figure.rating != null ? ` · ${figure.rating.toFixed(1)} de rating` : ""}
                         </span>
@@ -181,11 +198,11 @@ export default async function Home() {
               </div>
 
               <ol className="flex flex-col gap-px bg-line">
-                {night.matches.slice(0, 8).map((m, i) => (
+                {night.matches.slice(0, 6).map((m, i) => (
                   <li key={m.matchId} data-reveal style={{ ["--i" as string]: i }}>
                     <Link
                       href={`/partidos/${m.matchId}`}
-                      className="grid grid-cols-[auto_1fr_auto] items-center gap-4 bg-panel px-5 py-4 transition-colors hover:bg-panel-2 sm:px-6"
+                      className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 bg-panel px-5 py-4 transition-colors hover:bg-panel-2 sm:px-6"
                     >
                       <ResultChip r={resultOf(m.goals, m.goalsAgainst)} />
                       <span className="min-w-0">
@@ -200,10 +217,10 @@ export default async function Home() {
                     </Link>
                   </li>
                 ))}
-                {night.matches.length > 8 ? (
+                {night.matches.length > 6 ? (
                   <li>
                     <Link href="/partidos" className="tv flex min-h-14 items-center bg-panel px-6 text-2xl text-ink-2 hover:text-ink">
-                      Y {night.matches.length - 8} partidos más esa noche
+                      Y {night.matches.length - 6} partidos más esa noche
                     </Link>
                   </li>
                 ) : null}

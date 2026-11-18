@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { CountUp } from "@/components/count-up";
 import { Empty, PlayerFace, RatingChart, ResultChip, SectionHead } from "@/components/ui";
 import { getClubSummary, getPlayerMatches } from "@/lib/data";
-import { displayName, fmtDay, fmtTime, MATCH_TYPE_LABEL, num, posLabel, posShort, resultOf } from "@/lib/format";
+import { displayName, fmtDay, gamertagLabel, fmtTime, MATCH_TYPE_LABEL, num, posLabel, posShort, resultOf } from "@/lib/format";
 
 async function Player({ params }: { params: Promise<{ name: string }> }) {
   const gamertag = decodeURIComponent((await params).name);
@@ -50,8 +50,10 @@ async function Player({ params }: { params: Promise<{ name: string }> }) {
               {m?.proHeight ? <span className="tv text-3xl text-ink-2">{m.proHeight} cm</span> : null}
             </div>
             <div data-reveal style={{ ["--i" as string]: 2 }}>
-              <h1 className="tv bg-green px-4 pt-3 pb-2 text-7xl break-words text-white sm:text-8xl">{name}</h1>
-              {name !== gamertag ? <p className="bg-ink px-4 py-1.5 text-base font-semibold text-ground">{gamertag}</p> : null}
+              <h1 className="tv bg-green px-4 pt-3 pb-2 text-[clamp(3rem,11vw,6rem)] [overflow-wrap:anywhere] text-white">{name}</h1>
+              {gamertagLabel(gamertag, name) ? (
+                <p className="w-fit bg-ink px-4 py-1 text-sm font-semibold text-ground">EA: {gamertag}</p>
+              ) : null}
             </div>
             {m?.proOverall ? (
               <p className="flex items-baseline gap-3" data-reveal style={{ ["--i" as string]: 3 }}>
@@ -108,7 +110,7 @@ async function Player({ params }: { params: Promise<{ name: string }> }) {
                 <li key={g.matchId}>
                   <Link
                     href={`/partidos/${g.matchId}`}
-                    className="grid grid-cols-[auto_1fr_auto] items-center gap-4 bg-panel px-4 py-3 transition-colors hover:bg-panel-2 sm:px-6"
+                    className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 bg-panel px-4 py-3 transition-colors hover:bg-panel-2 sm:px-6"
                   >
                     <ResultChip r={resultOf(g.goals, g.goalsAgainst)} />
                     <span className="min-w-0">

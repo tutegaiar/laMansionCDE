@@ -10,7 +10,7 @@ export function MatchList({ matches }: { matches: MatchRow[] }) {
         <li key={m.matchId}>
           <Link
             href={`/partidos/${m.matchId}`}
-            className="grid grid-cols-[auto_1fr_auto] items-center gap-4 bg-panel px-4 py-3 transition-colors hover:bg-panel-2 sm:px-6"
+            className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 bg-panel px-4 py-3 transition-colors hover:bg-panel-2 sm:px-6"
           >
             <ResultChip r={resultOf(m.goals, m.goalsAgainst)} />
             <span className="min-w-0">

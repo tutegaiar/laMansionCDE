@@ -5,7 +5,7 @@ import { Crest, Empty, PlayerFace } from "@/components/ui";
 import { club } from "@/lib/config";
 import { getClubSummary, getMatch } from "@/lib/data";
 import type { EaMatchPlayer } from "@/lib/ea";
-import { displayName, fmtDay, fmtTime, MATCH_TYPE_LABEL, num, playerHref, posShort, resultOf } from "@/lib/format";
+import { displayName, fmtDay, gamertagLabel, fmtTime, MATCH_TYPE_LABEL, num, playerHref, posShort, resultOf } from "@/lib/format";
 
 const POS_ORDER: Record<string, number> = { goalkeeper: 0, defender: 1, midfielder: 2, forward: 3 };
 const RESULT_WORD = { W: "Victoria", D: "Empate", L: "Derrota" } as const;
@@ -137,7 +137,7 @@ async function MatchDetail({ params }: { params: Promise<{ id: string }> }) {
                 <li key={p.playername} data-reveal style={{ ["--i" as string]: i }}>
                   <Link
                     href={playerHref(p.playername)}
-                    className="grid grid-cols-[auto_1fr_auto] items-center gap-4 bg-panel py-2 pr-4 pl-2 transition-colors hover:bg-panel-2 sm:pr-6"
+                    className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 bg-panel py-2 pr-4 pl-2 transition-colors hover:bg-panel-2 sm:pr-6"
                   >
                     <PlayerFace gamertag={p.playername} name={name} size={52} />
                     <span className="min-w-0">
@@ -146,6 +146,7 @@ async function MatchDetail({ params }: { params: Promise<{ id: string }> }) {
                         {p.mom === "1" ? <span className="tv bg-ink px-2 pt-1 pb-0.5 text-lg text-ground">Figura</span> : null}
                       </span>
                       <span className="block text-sm text-ink-2">
+                        {gamertagLabel(p.playername, name) ? `${p.playername} · ` : ""}
                         {posShort(p.pos)} · {num(p.goals)} G · {num(p.assists)} A · {p.shots} tiros · pases {p.passesmade}/
                         {p.passattempts} · quites {p.tacklesmade}/{p.tackleattempts}
                         {num(p.saves) ? ` · ${p.saves} atajadas` : ""}

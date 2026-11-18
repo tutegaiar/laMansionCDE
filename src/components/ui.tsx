@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { club, playerOverride } from "@/lib/config";
-import type { Result } from "@/lib/format";
+import { divisionName, divisionTier, type Result } from "@/lib/format";
 
 const RESULT_STYLE: Record<Result, { label: string; cls: string; title: string }> = {
   W: { label: "G", cls: "bg-green text-white", title: "Ganado" },
@@ -105,7 +105,7 @@ export function Crest({ size = 40 }: { size?: number }) {
       style={{
         width: size,
         height: size * 1.15,
-        fontSize: size * 0.42,
+        fontSize: Math.max(14, size * 0.42),
         clipPath: "polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%)",
       }}
     >
@@ -149,5 +149,21 @@ export function RatingChart({ values }: { values: number[] }) {
         </circle>
       ))}
     </svg>
+  );
+}
+
+const TIER_STYLE = {
+  gold: "bg-[#e0bb4f] text-[#1c1400]",
+  silver: "bg-[#c9ced3] text-[#0b0d0f]",
+  bronze: "bg-[#c47d45] text-[#170b02]",
+  club: "bg-green text-white",
+} as const;
+
+/** Placa de la división, con el metal según el nivel. */
+export function DivisionBadge({ division, size = "lg" }: { division: number; size?: "sm" | "lg" }) {
+  const tier = divisionTier(division);
+  const dim = size === "lg" ? "px-4 pt-2.5 pb-1.5 text-[clamp(2.25rem,5vw,3.5rem)]" : "px-2 pt-1 pb-0.5 text-xl";
+  return (
+    <span className={`tv inline-flex w-fit items-center ${dim} ${TIER_STYLE[tier]}`}>{divisionName(division)}</span>
   );
 }

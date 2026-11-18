@@ -6,6 +6,8 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 export type LineupPlayer = {
   gamertag: string;
   name: string;
+  sub: string | null;
+  highlight: string | null;
   pos: string;
   href: string;
   face: React.ReactNode;
@@ -94,7 +96,12 @@ export function Lineup({ players }: { players: LineupPlayer[] }) {
               </div>
             </div>
 
-            <div className="flex flex-col justify-end gap-6 bg-panel px-5 pt-6 pb-6 sm:px-8 md:pb-10">
+            <div className="flex flex-col justify-between gap-6 bg-panel px-5 pt-6 pb-6 sm:px-8 md:pt-10 md:pb-10">
+              <p className="tv text-4xl text-ink-2 transition-all duration-500 ease-[var(--ease-out)] motion-safe:opacity-0 motion-safe:group-data-[active=true]:opacity-100 lg:text-5xl">
+                <span className="text-ink">{i + 1}</span> de {players.length}
+                {p.highlight ? <span className="mt-2 block text-green-ink">{p.highlight}</span> : null}
+              </p>
+              <div className="flex flex-col gap-6">
               <div className="flex items-baseline gap-4 transition-all delay-100 duration-500 ease-[var(--ease-out)] motion-safe:translate-y-3 motion-safe:opacity-0 motion-safe:group-data-[active=true]:translate-y-0 motion-safe:group-data-[active=true]:opacity-100">
                 <span className="tv text-2xl text-green-ink">{p.pos}</span>
                 {p.ovr ? <span className="tv text-2xl text-ink-2">Media {p.ovr}</span> : null}
@@ -107,8 +114,8 @@ export function Lineup({ players }: { players: LineupPlayer[] }) {
                 >
                   <span className="block truncate">{p.name}</span>
                 </Link>
-                {p.name !== p.gamertag ? (
-                  <div className="bg-ink px-4 py-1.5 text-base font-semibold text-ground">{p.gamertag}</div>
+                {p.sub ? (
+                  <div className="w-fit bg-ink px-4 py-1 text-sm font-semibold text-ground">{p.sub}</div>
                 ) : null}
               </div>
 
@@ -124,6 +131,7 @@ export function Lineup({ players }: { players: LineupPlayer[] }) {
                   </div>
                 ))}
               </dl>
+              </div>
             </div>
           </article>
         ))}

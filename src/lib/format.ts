@@ -55,20 +55,42 @@ export const num = (v: unknown) => {
   return Number.isFinite(n) ? n : 0;
 };
 
-/** Nombre para mostrar: alias manual > nombre del Pro > gamertag. */
+/**
+ * Nombre grande: el del jugador en el club (alias en config > nombre del Pro en EA > gamertag).
+ * El gamertag de EA va aparte, chiquito (ver `gamertagLabel`).
+ */
 export function displayName(gamertag: string, member?: Pick<EaMember, "proName"> | null) {
   const o = playerOverride(gamertag);
   if (o.alias) return o.alias;
-  if (/^[0-9a-f]{16}$/.test(gamertag) && member?.proName) return member.proName;
+  if (member?.proName?.trim()) return member.proName.trim();
   return gamertag;
+}
+
+/** Gamertag para mostrar chiquito; null si es un hash de EA (no dice nada) o igual al nombre. */
+export function gamertagLabel(gamertag: string, name: string): string | null {
+  if (/^[0-9a-f]{16}$/.test(gamertag)) return null;
+  return gamertag.toLowerCase() === name.toLowerCase() ? null : gamertag;
 }
 
 export const playerHref = (gamertag: string) => `/jugador/${encodeURIComponent(gamertag)}`;
 
+/** División: 0 = Elite, 1 = Primera, … */
 export function divisionOf(season: { currentDivision?: string } | null) {
   if (club.divisionOverride != null) return { value: club.divisionOverride, manual: true };
-  const d = Number(season?.currentDivision);
-  return Number.isFinite(d) && d > 0 ? { value: d, manual: false } : null;
+  const raw = season?.currentDivision;
+  const d = Number(raw);
+  return raw != null && raw !== "" && Number.isFinite(d) && d >= 0 ? { value: d, manual: false } : null;
+}
+
+const DIV_NAMES = ["Elite", "Primera División", "Segunda División", "Tercera División", "Cuarta División", "Quinta División", "Sexta División", "Séptima División", "Octava División", "Novena División", "Décima División"];
+export const divisionName = (d: number) => DIV_NAMES[d] ?? `División ${d}`;
+
+/** Medalla por nivel: Elite y Primera oro, 2ª y 3ª plata, 4ª y 5ª bronce, el resto el verde del club. */
+export function divisionTier(d: number): "gold" | "silver" | "bronze" | "club" {
+  if (d <= 1) return "gold";
+  if (d <= 3) return "silver";
+  if (d <= 5) return "bronze";
+  return "club";
 }
 
 const toAr = (iso: string) => new Date(new Date(iso).getTime() - 3 * 3600 * 1000);
