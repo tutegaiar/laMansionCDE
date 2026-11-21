@@ -54,6 +54,12 @@ export const players: Record<string, PlayerOverride> = {
     sceneFocus: "38% 50%",
     carnet: "/players/feikkir-carnet.webp",
   },
+  Napoleonn912: {
+    mini: "/players/napoleonn912-mini-v2.webp",
+    scene: "/players/napoleonn912-escena.webp",
+    sceneFocus: "40% 30%",
+    carnet: "/players/napoleonn912-carnet-v2.webp",
+  },
   // Sin alias se usa el nombre del Pro que devuelve EA. Ejemplos:
   // "ramaa_damedin": { alias: "Nombre Apellido", photo: "/players/ramaa_damedin.jpg" },
 };
